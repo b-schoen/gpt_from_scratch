@@ -593,7 +593,7 @@ def generate_and_decode_text(
 # -- now we get to the part specific for our problem
 
 # how many independent sequences will we process in parallel?
-BATCH_SIZE = 4
+BATCH_SIZE = 32
 
 # what is the maximum context length for predictions?
 BLOCK_SIZE = 8
@@ -632,7 +632,7 @@ N_TRANSFORMER_BLOCKS = 4
 # - ... + ff inner dim factor (4): 2.11
 # - ... + layer norm: 2.14
 # - ... + layer norm + final layer norm after transformer blocks: 2.14
-# - ... + dropout:
+# - ... + dropout: 1.96
 def main() -> None:
 
     # note: does this cover the attention head too? presumably every sub module
