@@ -44,17 +44,25 @@ type Block = Int64[Tensor, "block_size"]
 type BatchedBlocks = Int64[Block, "batch_size"]
 
 
-# always good to start with the simplest possible model
-# note: there's dedicated lecture for this
-class BigramLanguageModel(nn.Module):
+# Adding in token embeddings means we need a linear layer
+# (to go from token embeddings to logits, basically to undo the linear embedding layer)
+# Is this just an unembedding layer?
+class BigramWithTokenEmbeddingsLanguageModel(nn.Module):
 
     @jaxtyped(typechecker=typechecker)
-    def __init__(self, vocab_size: int) -> None:
+    def __init__(
+        self,
+        vocab_size: int,
+        n_embed: int,
+    ) -> None:
 
         super().__init__()
 
         # each token directly reads off the logits for the next token from a lookup table
-        self.token_embedding_table: nn.Embedding = nn.Embedding(vocab_size, vocab_size)
+        self.token_embedding_table = nn.Embedding(vocab_size, n_embed)
+
+        # map from token embeddings back to logits
+        self.lm_head = nn.Linear(n_embed, vocab_size)
 
     @jaxtyped(typechecker=typechecker)
     def forward(
@@ -68,14 +76,16 @@ class BigramLanguageModel(nn.Module):
     ]:
 
         # idx and targets are both (B,T) tensor of integers
-        logits: Float32[Tensor, "batch_size block_size vocab_size"] = (
+        token_embeddings: Float32[Tensor, "batch_size block_size n_embed"] = (
             self.token_embedding_table(idx)
+        )
+        logits: Float32[Tensor, "batch_size block_size vocab_size"] = self.lm_head(
+            token_embeddings
         )
 
         # if no targets, nothing to calculate
         if targets is None:
-            loss = None
-            return logits, loss
+            return logits, None
 
         B, T, C = logits.shape
 
@@ -246,7 +256,9 @@ NUM_BATCHES_TO_EVAL = 100
 # how often to evaluate the model
 EVALUATE_EVERY_N_STEPS = 10000
 
-MAX_STEPS = 1000000
+MAX_STEPS = 100000
+
+N_EMBED = 32
 
 
 # note: get's stuck around 2.4 no matter what
@@ -284,7 +296,10 @@ def main() -> None:
     print(f" - train: {len(train_data)}")
     print(f" - val: {len(val_data)}")
 
-    m = BigramLanguageModel(vocab_size=len(vocab.unique_elements))
+    m = BigramWithTokenEmbeddingsLanguageModel(
+        vocab_size=len(vocab.unique_elements),
+        n_embed=N_EMBED,
+    )
     m.to(device)
 
     print("Output before optimizing:")
@@ -333,8 +348,6 @@ def main() -> None:
         loss.backward()
 
         optimizer.step()
-
-    print(loss.item())
 
     print("Output after optimizing:")
     print(print(generate_and_decode_text(m, vocab, device)))
