@@ -299,6 +299,12 @@ class TransformerBlock(nn.Module):
     Note: In the original `attention` paper, this was applied after attention / feed forward,
           now it's common to apply them before
 
+          From: [Language Models are Unsupervised Multitask Learners](https://cdn.openai.com/research-covers/language-unsupervised/language_understanding_paper.pdf)
+
+          > Layer normalization (Ba et al., 2016) was moved to the input of each sub-block, similar to a
+            pre-activation residual network (He et al., 2016) and an additional layer normalization was
+            added after the final self-attention block.
+
     """
 
     def __init__(
@@ -351,6 +357,17 @@ class TransformerBlock(nn.Module):
 # We're basically add a bunch of stuff onto just bigram *first*
 #
 class BigramWithSelfAttentionLanguageModel(nn.Module):
+    """
+    Interestingly differences from GPT-1 are only (per: [Language Models are Unsupervised Multitask Learners](https://d4mucfpksywv.cloudfront.net/better-language-models/language_models_are_unsupervised_multitask_learners.pdf))
+
+     * Layer normalization moving to input + final
+     * A modified initialization which accounts for the accumulation on the residual path with model depth is used.
+        * We scale the weights of residual layers at initialzation by a factor of 1/ N where N is the number of residual layers.
+     * The vocabulary is expanded to 50,257.
+     * We also increase the context size from 512 to 1024 tokens
+     * A larger batchsize of 512 is used.
+
+    """
 
     @jaxtyped(typechecker=typechecker)
     def __init__(
