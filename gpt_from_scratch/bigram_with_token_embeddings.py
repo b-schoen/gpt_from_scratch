@@ -47,19 +47,26 @@ type BatchedBlocks = Int64[Block, "batch_size"]
 # Adding in token embeddings means we need a linear layer
 # (to go from token embeddings to logits, basically to undo the linear embedding layer)
 # Is this just an unembedding layer?
-class BigramWithTokenEmbeddingsLanguageModel(nn.Module):
+#
+# We're basically add a bunch of stuff onto just bigram *first*
+#
+class BigramEnhancedLanguageModel(nn.Module):
 
     @jaxtyped(typechecker=typechecker)
     def __init__(
         self,
         vocab_size: int,
         n_embed: int,
+        block_size: int,
     ) -> None:
 
         super().__init__()
 
         # each token directly reads off the logits for the next token from a lookup table
         self.token_embedding_table = nn.Embedding(vocab_size, n_embed)
+
+        # add position embeddings
+        self.position_embedding_table = nn.Embedding(block_size, n_embed)
 
         # map from token embeddings back to logits
         self.lm_head = nn.Linear(n_embed, vocab_size)
@@ -79,9 +86,18 @@ class BigramWithTokenEmbeddingsLanguageModel(nn.Module):
         token_embeddings: Float32[Tensor, "batch_size block_size n_embed"] = (
             self.token_embedding_table(idx)
         )
-        logits: Float32[Tensor, "batch_size block_size vocab_size"] = self.lm_head(
-            token_embeddings
+
+        # ex: [0, 1, 2, 3, ...]
+        pos_indices = torch.arange(idx.shape[1], device=idx.device)
+        pos_embeddings: Float32[Tensor, "batch_size block_size n_embed"] = (
+            self.position_embedding_table(pos_indices)
         )
+
+        # concat
+        x = token_embeddings + pos_embeddings
+
+        # takes them back from token embedding space to logits
+        logits: Float32[Tensor, "batch_size block_size vocab_size"] = self.lm_head(x)
 
         # if no targets, nothing to calculate
         if targets is None:
@@ -296,8 +312,9 @@ def main() -> None:
     print(f" - train: {len(train_data)}")
     print(f" - val: {len(val_data)}")
 
-    m = BigramWithTokenEmbeddingsLanguageModel(
+    m = BigramEnhancedLanguageModel(
         vocab_size=len(vocab.unique_elements),
+        block_size=BLOCK_SIZE,
         n_embed=N_EMBED,
     )
     m.to(device)
