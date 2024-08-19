@@ -11,6 +11,7 @@ download_cache/
 
 # osx
 .DS_Store/
+.DS_Store
 
 # Distribution / packaging
 .Python
