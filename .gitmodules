@@ -1,0 +1,3 @@
+[submodule "evalugator"]
+	path = evalugator
+	url = https://github.com/LRudL/evalugator.git

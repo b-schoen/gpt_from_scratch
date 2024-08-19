@@ -4,6 +4,7 @@ Includes:
  * jaxtyping annotations for all functions / variables
  * `mps` locally
  * dedicated `BytePairEncodingTokenizer` class with token mapping / colorization support
+ * `evalugator` examples
 
 Table of Contents
 
