@@ -1,15 +1,51 @@
 import unicodedata
 import random
+from typing import Protocol
 
 import termcolor
 from colored import fg, bg, attr
 
-# TODO(bschoen): Could have a general tokenizer protocol
-from .byte_pair_encoding_tokenizer import BytePairEncodingTokenizer
+
+class Tokenizer(Protocol):
+    """Tokenizer protocol compatible with both `BytePairEncodingTokenizer` and `tiktoken.Encoding`"""
+
+    def decode(self, encoded_bytes: list[int]) -> str: ...
+
+    def encode(self, text: str) -> list[int]: ...
+
+    def decode_single_token_bytes(self, encoded_byte: int) -> bytes: ...
+
+
+def get_colored_tokenization_of_split_string(
+    substrings: list[str],
+) -> str:
+    """Assuming we have a string split based on some tokenization, return coloring of it."""
+
+    # Use a limited set of widely supported background colors
+    bg_colors = ["on_red", "on_green", "on_yellow", "on_blue", "on_magenta", "on_cyan"]
+    random.shuffle(bg_colors)
+
+    colored_text = ""
+
+    for i, substring in enumerate(substrings):
+        token_string = substring
+
+        # Color this token's background
+        bg_color = bg_colors[
+            i % len(bg_colors)
+        ]  # Cycle through colors if we have more tokens than colors
+
+        # Use black text on light backgrounds, white text on dark backgrounds
+        # text_color = 'black' if bg_color in ['on_yellow', 'on_cyan'] else 'white'
+        text_color = "white"
+
+        colored_text += termcolor.colored(token_string, text_color, bg_color)
+
+    return colored_text
 
 
 def get_colored_tokenization(
-    tokenizer: BytePairEncodingTokenizer,
+    tokenizer: Tokenizer,
     input_string: str,
 ) -> str:
     """Get string with terminal colors marking the tokenization of the input string."""
@@ -24,7 +60,7 @@ def get_colored_tokenization(
     colored_text = ""
 
     for i, token in enumerate(encoded_tokens):
-        token_bytes = tokenizer.vocab[token]
+        token_bytes = tokenizer.decode_single_token_bytes(token)
         token_string = token_bytes.decode("utf-8", errors="replace")
 
         # Color this token's background
@@ -41,7 +77,7 @@ def get_colored_tokenization(
     return colored_text
 
 
-def color_encode(byte):
+def color_encode(byte: int) -> str:
     if byte < 128:  # ASCII
         return fg("green") + format(byte, "02X") + attr("reset")
     elif byte < 192:  # Continuation byte
@@ -54,7 +90,7 @@ def color_encode(byte):
         return fg("red") + format(byte, "02X") + attr("reset")
 
 
-def show_token_mapping(tokenizer: BytePairEncodingTokenizer, input_string: str) -> None:
+def show_token_mapping(tokenizer: Tokenizer, input_string: str) -> None:
     """Display tokenization for the given input string."""
 
     # Color legend
@@ -77,7 +113,7 @@ def show_token_mapping(tokenizer: BytePairEncodingTokenizer, input_string: str) 
     current_char_position = 0
 
     for token in encoded_tokens:
-        token_bytes = tokenizer.vocab[token]
+        token_bytes = tokenizer.decode_single_token_bytes(token)
         token_string = token_bytes.decode("utf-8", errors="replace")
 
         # Color-code the bytes

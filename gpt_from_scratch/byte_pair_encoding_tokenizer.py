@@ -162,3 +162,7 @@ class BytePairEncodingTokenizer:
             tokens = merge(tokens, top_pair, new_token)
 
         return tokens
+
+    # for compatibility with tiktoken
+    def decode_single_token_bytes(self, encoded_byte: int) -> bytes:
+        return self.vocab[encoded_byte]
