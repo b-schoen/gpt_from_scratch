@@ -9,6 +9,9 @@ __pycache__/
 # download cache
 download_cache/
 
+# osx
+.DS_Store/
+
 # Distribution / packaging
 .Python
 build/
