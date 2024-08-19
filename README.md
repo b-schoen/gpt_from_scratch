@@ -109,6 +109,7 @@ Make thy master.
 
 
 <img src="./images/example_byte_pair_encoding_tokenization.png" width="600">
+<img src="./images/example_byte_pair_encoding_tokenization_2.png" width="600">
 
 
 
