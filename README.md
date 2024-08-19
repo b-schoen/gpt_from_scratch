@@ -40,6 +40,55 @@ To no
 Same as above but run with much larger params:
 
 ```python
+Step 3100, Train Loss: 1.0477, Val Loss: 1.4678
+Sampling at 3100:
+---
+
+No, no; for the other bride unprovible
+Mistakes to strength them: for, who should not from
+```
+
+Interestingly the above is the best it gets, after that it
+starts to dramatically overfit (as seen by the increasing
+val loss):
+
+```python
+Step 10000, Train Loss: 0.2645, Val Loss: 2.1802
+Sampling at 10000:
+---
+
+Half an envious and the clouds upon him;
+During him to all prove and cities shall find
+The loving en
+None
+---
+Output after optimizing:
+---
+
+For some known before I have said, and here I chance to sport:
+Her father's grave and her stands, be not my sword.
+
+Nurse:
+Now blessed be the heart, and so bound afrend!
+
+RATCLIFF:
+No more, my lord: coward for me!
+
+Nurse:
+Marry, I say, I tell thee! she loves my heart!
+
+RATCLIFF:
+
+KING RICHARD III:
+I would they were in the character.
+
+Nurse:
+Tybalt is gone, and Romeo banished;
+Romeo that is banished, was the name;
+And there is no thing, no, not he's more much.
+
+RATCLIFF:
+Make thy master.
 ```
   
 ## Lecture 8: Let's build the GPT Tokenizer
