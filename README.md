@@ -2,7 +2,17 @@ GPT from scratch via https://github.com/karpathy/nn-zero-to-hero
 
 Includes:
  * jaxtyping annotations for all functions / variables
- * uses `"mps"`
+ * `mps` locally
+ * dedicated `BytePairEncodingTokenizer` class with token mapping / colorization support
+
+Table of Contents
+
+- [Lecture 7: Let's build GPT: from scratch, in code, spelled out.](#lecture-7-lets-build-gpt-from-scratch-in-code-spelled-out)
+  - [Code:  `gpt_from_scratch/bigram_with_self_attention.py`](#code--gpt_from_scratchbigram_with_self_attentionpy)
+  - [Colab: `colab/bigram_with_self_attention.py`](#colab-colabbigram_with_self_attentionpy)
+- [Lecture 8: Let's build the GPT Tokenizer](#lecture-8-lets-build-the-gpt-tokenizer)
+  - [Byte Pair Encoder Tokenization](#byte-pair-encoder-tokenization)
+
 
 ## Lecture 7: Let's build GPT: from scratch, in code, spelled out.
 
@@ -95,8 +105,10 @@ Make thy master.
 
 [Ref Colab Notebook](https://colab.research.google.com/drive/1y0KnCFZvGVf_odSfcNAws6kcDD7HsI0L?usp=sharing#scrollTo=pkAPaUCXOhvW)
 
+### Byte Pair Encoder Tokenization
 
 
+<img src="./images/example_byte_pair_encoding_tokenization.png" width="600">
 
 
 

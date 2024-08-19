@@ -159,13 +159,6 @@ class BytePairEncodingTokenizer:
 
             new_token = self.merges[top_pair]
 
-            print(
-                f"Merging\t{top_pair}"
-                f"\t[{pair_to_char(top_pair)}]"
-                f"\t(count: {pair_counts[top_pair]})"
-                f"\t-> new token: {new_token}"
-            )
-
             tokens = merge(tokens, top_pair, new_token)
 
         return tokens
