@@ -1,0 +1,15 @@
+# Configuration ID
+id: default
+
+# Templates section
+templates:
+  # Example Template Extension
+  - id: example_extension
+    type: TemplateExtension
+    # Specifies where the extension should be applied
+    location: prefix
+    # The actual content of the extension
+    template: >
+      This is an example extension. This string will be prefixed to the results
+      of a sample template if you include this. You can use the same variables (including
+      your own and special ones) as are available for SampleTemplates.

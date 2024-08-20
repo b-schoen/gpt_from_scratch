@@ -1,0 +1,138 @@
+# Define special variables to be used in prompt templates
+define_your_special_variables:
+  description: '[write out what will be substituted in place of {{description}} in prompt templates below]'
+  random_special_variable:
+    - Here is a list of strings
+    - Another string
+    - Evalugator will select one of these at random whenever {{random_special_variable}} is used in a sample template
+  yet_another_special_variable: '[...]'
+
+# Pre-defined special variables
+defined_special_variables:
+  _answer_lines: the lines specifying the answer choices (when this is a multiple choice question)
+  _ideal_answers: the list of ideal answers to the question
+  _question_body: the body of the question
+
+# Configuration ID
+id: default
+
+# Templates for different question types and formats
+templates:
+  # Default Question-Answer template
+  - id: qa_default
+    type: QATemplate
+    prompt_template:
+      - role: user
+        content: '{{_question_body}}'
+    request_args: {}
+
+  # Default Multiple Choice Question template
+  - id: mcq_default
+    type: MCQuestionTemplate
+    answer_style: (A)
+    answer_styles_accepted:
+      - (A)
+      - A)
+      - A
+    prompt_template:
+      - role: user
+        content: |-
+          Answer the following question with the label of the most correct answer choice and nothing else.
+
+          {{_question_body}}
+          {{_answer_lines}}
+
+          Answer: (
+    request_args: {}
+
+  # Minimal Multiple Choice Question template
+  - id: mcq_minimal
+    type: MCQuestionTemplate
+    answer_style: (A)
+    answer_styles_accepted:
+      - (A)
+      - A)
+      - A
+    prompt_template:
+      - role: user
+        content: |-
+          {{_question_body}}
+          {{_answer_lines}}
+
+          Answer: (
+    request_args: {}
+
+  # Chain-of-Thought Multiple Choice Question template
+  - id: mcq_cot
+    type: MCQuestionTemplate
+    answer_style: (A)
+    answer_styles_accepted:
+      - (A)
+      - A)
+      - A
+    prompt_template:
+      - role: user
+        content: |-
+          Here is a question: {{_question_body}}
+          {{_answer_lines}}
+
+          Reason step-by-step towards an answer to this question, then end your answer with "So the answer is (X).", where X is your answer.
+    request_args: {}
+
+  # LLaMA Question-Answer template
+  - id: qa_llama
+    type: MCQuestionTemplate
+    answer_style: (A)
+    answer_styles_accepted:
+      - (A)
+      - A
+      - A)
+    prompt_template: |-
+      <s>[INST] <<SYS>>
+      You are a helpful assistant.
+      <</SYS>>
+
+      {{_question_body}} [/INST]
+    request_args: {}
+
+  # LLaMA Multiple Choice Question template
+  - id: mcq_llama
+    type: MCQuestionTemplate
+    answer_style: (A)
+    answer_styles_accepted:
+      - A)
+      - A
+    prompt_template: |-
+      <s>[INST] <<SYS>> Answer the following question with the label of the most correct answer choice and nothing else. <</SYS>> {{_question_body}}
+      {{_answer_lines}} [/INST] Answer: (
+    request_args: {}
+
+  # Claude Manual Question-Answer template
+  - id: qa_claude_manual
+    type: MCQuestionTemplate
+    answer_style: (A)
+    answer_styles_accepted:
+      - (A)
+      - A
+      - A)
+    prompt_template: |-
+      Human: {{_question_body}}
+
+      Assistant:
+    request_args: {}
+
+  # Claude Manual Multiple Choice Question template
+  - id: mcq_claude_manual
+    type: MCQuestionTemplate
+    answer_style: (A)
+    answer_styles_accepted:
+      - A)
+      - A
+    prompt_template: |-
+      Human: Answer the following question with the label of the most correct answer choice and nothing else.
+
+      {{_question_body}}
+      {{_answer_lines}}
+
+      Assistant: Answer: (
+    request_args: {}

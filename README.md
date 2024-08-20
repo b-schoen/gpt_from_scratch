@@ -1,10 +1,5 @@
 GPT from scratch via https://github.com/karpathy/nn-zero-to-hero
 
-Includes:
- * jaxtyping annotations for all functions / variables
- * `mps` locally
- * dedicated `BytePairEncodingTokenizer` class with token mapping / colorization support
- * `evalugator` examples
 
 Table of Contents
 
@@ -13,7 +8,19 @@ Table of Contents
   - [Colab: `colab/bigram_with_self_attention.py`](#colab-colabbigram_with_self_attentionpy)
 - [Lecture 8: Let's build the GPT Tokenizer](#lecture-8-lets-build-the-gpt-tokenizer)
   - [Byte Pair Encoder Tokenization](#byte-pair-encoder-tokenization)
+- [Evalugator With Function Calling](#evalugator-with-function-calling)
 
+
+Includes:
+ * jaxtyping annotations for all functions / variables
+ * `mps` locally
+ * dedicated `BytePairEncodingTokenizer` class with token mapping / colorization support
+ * `evalugator` examples
+
+Running tests:
+```bash
+python -m pytest
+```
 
 ## Lecture 7: Let's build GPT: from scratch, in code, spelled out.
 
@@ -114,3 +121,38 @@ Make thy master.
 
 
 
+## Evalugator With Function Calling
+
+In `evals`:
+
+```bash
+> evalg init -v
+
+sampletemplates: Modify and add sample templates.
+Saved in: structs/sampletemplates/default.yaml
+
+templateextensions: Modify and add template extensions.
+Saved in: structs/templateextensions/default.yaml
+
+evalspecs: Modify and add render settings.
+Saved in: structs/evalspecs/default.yaml
+
+examples: Example datasets.
+Saved in: ('Example datasets saved in: /Users/bronsonschoen/gpt_from_scratch/evals/example_data', '/Users/bronsonschoen/gpt_from_scratch/evals/example_data')
+```
+
+Which generated the files
+```bash
+> tree -C
+.
+├── example_data
+│   ├── mcq.jsonl
+│   └── qa.jsonl
+└── structs
+    ├── evalspecs
+    │   └── default.yaml
+    ├── sampletemplates
+    │   └── default.yaml
+    └── templateextensions
+        └── default.yaml
+```

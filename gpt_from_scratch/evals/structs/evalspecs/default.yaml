@@ -1,0 +1,35 @@
+# Configuration ID
+id: default
+
+# Templates for evaluation specifications
+templates:
+  # Simple Evaluation Specification
+  - id: sample
+    type: SimpleEvalSpec
+    render_settings:
+      extensions: []
+      extensions_file: default
+      parser: default
+      renderer: default
+      template: mcq_default
+      templates_file: default
+
+  # Model-Graded Evaluation Specification
+  - id: sample
+    type: ModelGradedEvalSpec
+    # Render settings for the grader
+    render_settings_for_grader:
+      extensions: []
+      extensions_file: default
+      parser: default
+      renderer: default
+      template: mcq_default
+      templates_file: default
+    # Render settings for the solver
+    render_settings_for_solver:
+      extensions: []
+      extensions_file: default
+      parser: default
+      renderer: default
+      template: mcq_default
+      templates_file: default
