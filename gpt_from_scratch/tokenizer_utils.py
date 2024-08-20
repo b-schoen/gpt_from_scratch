@@ -1,9 +1,24 @@
 import unicodedata
 import random
 from typing import Protocol
+import dataclasses
+import json
+
 
 import termcolor
 from colored import fg, bg, attr
+
+
+@dataclasses.dataclass(frozen=True)
+class TokenInfo:
+    token_index: int
+    """Index of the token (ex: 1)"""
+
+    token_string: str
+    """The actual token text representation (ex: `你好`, this will be a single token)"""
+
+    token_split_into_characters: list[str]
+    """The characters that make up the token (ex: `['你', '好']`, or `['s', 't', 'r', 'a', 'w', 'b', 'e', 'r', 'r', 'y']`)"""
 
 
 class Tokenizer(Protocol):
@@ -14,6 +29,60 @@ class Tokenizer(Protocol):
     def encode(self, text: str) -> list[int]: ...
 
     def decode_single_token_bytes(self, encoded_byte: int) -> bytes: ...
+
+
+# TODO(bschoen): Probably want general pattern of partially binding with typed callables
+#                (for example so this gets a tokenizer without the model needing to know about it)
+def get_detailed_and_complete_tokenization_info_for_text(
+    tokenizer: Tokenizer,
+    text: str,
+) -> list[TokenInfo]:
+    """
+    Tokenize the given text and return detailed information about each token.
+
+    This is useful any time the user asks questions that involve individual characters
+    or anything else that involves manipulating substrings that are potentially shorter
+    than a token.
+
+    The output is a list of the following form:
+
+        [
+            {'token_index': 0, 'token_string': '你好', 'token_split_into_characters': ['你', '好']},
+            {'token_index': 1, 'token_string': 'strawberry', 'token_split_into_characters': ['s', 't', 'r', 'a', 'w', 'b', 'e', 'r', 'r', 'y']}
+        ]
+
+    Where:
+        - `token_index` is the index of the token in the original text
+        - `token_string` is the actual token text representation
+        - `token_split_into_characters` is the characters that make up the token
+
+    Args:
+        text (str): User provided text to tokenize, this can span multiple tokens (ex: `你好 strawberry`)
+    """
+
+    # ex: [177519, 101830]
+    encoded_tokens = tokenizer.encode(text)
+
+    token_infos: list[TokenInfo] = []
+
+    for i, token in enumerate(encoded_tokens):
+
+        # recover original string for token (ex: `你好`)
+        token_bytes = tokenizer.decode_single_token_bytes(token)
+        token_string = token_bytes.decode("utf-8", errors="replace")
+
+        # now recover what `text_characters`s this corresponds to
+        corresponding_text_characters = [c for c in token_string]
+
+        token_infos.append(
+            TokenInfo(
+                token_index=i,
+                token_string=token_string,
+                token_split_into_characters=corresponding_text_characters,
+            )
+        )
+
+    return token_infos
 
 
 def get_colored_tokenization_of_split_string(

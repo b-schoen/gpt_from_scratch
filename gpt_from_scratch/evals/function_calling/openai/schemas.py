@@ -74,7 +74,14 @@ def generate_json_schema_for_function[
 
     for param_name, param in sig.parameters.items():
         # determine type
-        param_python_type = type_hints[param_name]
+        try:
+            param_python_type = type_hints[param_name]
+        except KeyError as e:
+            raise ValueError(
+                f"Missing type hint for parameter: {param_name}, "
+                f"function signature was: {sig}"
+            ) from e
+
         param_schema = python_type_to_json_schema(param_python_type)
 
         # parse description from docstring
