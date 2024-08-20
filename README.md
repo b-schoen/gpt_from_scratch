@@ -8,7 +8,9 @@ Table of Contents
   - [Colab: `colab/bigram_with_self_attention.py`](#colab-colabbigram_with_self_attentionpy)
 - [Lecture 8: Let's build the GPT Tokenizer](#lecture-8-lets-build-the-gpt-tokenizer)
   - [Byte Pair Encoder Tokenization](#byte-pair-encoder-tokenization)
-- [Evalugator With Function Calling](#evalugator-with-function-calling)
+- [Evalugator](#evalugator)
+  - [With Function Calling](#with-function-calling)
+  - [Custom Evaluation](#custom-evaluation)
 
 
 Includes:
@@ -121,44 +123,32 @@ Make thy master.
 
 
 
-## Evalugator With Function Calling
+## Evalugator
 
-In `evals`:
-
-```bash
-> evalg init -v
-
-sampletemplates: Modify and add sample templates.
-Saved in: structs/sampletemplates/default.yaml
-
-templateextensions: Modify and add template extensions.
-Saved in: structs/templateextensions/default.yaml
-
-evalspecs: Modify and add render settings.
-Saved in: structs/evalspecs/default.yaml
-
-examples: Example datasets.
-Saved in: ('Example datasets saved in: /Users/bronsonschoen/gpt_from_scratch/evals/example_data', '/Users/bronsonschoen/gpt_from_scratch/evals/example_data')
-```
-
-Which generated the files
-```bash
-> tree -C
-.
-├── example_data
-│   ├── mcq.jsonl
-│   └── qa.jsonl
-└── structs
-    ├── evalspecs
-    │   └── default.yaml
-    ├── sampletemplates
-    │   └── default.yaml
-    └── templateextensions
-        └── default.yaml
-```
+### With Function Calling
 
 We then create an `openai` provider with function calling support:
 
 <img src="./images/sparks_of_artifical_general_intelligence.png" width="600">
 
 Similar function calling and schema generation for `anthropic` (as well as tests) are provided as well
+
+### Custom Evaluation
+
+```python
+from gpt_from_scratch.evals.arithmetic_eval import (
+  arithmetic_eval,
+  visualization,
+)
+
+# note: Returns json normalized `evalugator.evals.EvalResult`
+df = arithmetic_eval.create_and_run_eval(
+  model='gpt-4o-mini',
+  max_depth=10,
+  num_problems=10000,
+)
+
+visualization.plot_heatmap(df)
+```
+
+<img src="./images/example_eval_result_heatmap.png" width="600">

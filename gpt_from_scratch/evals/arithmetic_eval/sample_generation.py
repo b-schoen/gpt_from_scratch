@@ -1,10 +1,18 @@
 import random
 import dataclasses
-import argparse
+import textwrap
+
+import evalugator.structs
+
+import hashlib
+import json
+import dataclasses
 
 
 # some example problem generation
-def generate_complex_problem(max_depth: int, current_depth: int = 0) -> tuple[str, int]:
+def _generate_complex_problem(
+    max_depth: int, current_depth: int = 0
+) -> tuple[str, int]:
     """
     Recursively generate a complex mathematical problem as a string expression,
     also returning the maximum depth reached.
@@ -31,7 +39,7 @@ def generate_complex_problem(max_depth: int, current_depth: int = 0) -> tuple[st
     operations = ["+", "-", "*", "/", "**"]  # Added '**' for exponentiation
     operation = random.choice(operations)
 
-    left_expr, left_depth = generate_complex_problem(max_depth, current_depth + 1)
+    left_expr, left_depth = _generate_complex_problem(max_depth, current_depth + 1)
 
     if operation == "**":
         # Limit the exponent to avoid extremely large numbers
@@ -39,7 +47,9 @@ def generate_complex_problem(max_depth: int, current_depth: int = 0) -> tuple[st
         # Since we're not recursing for the right side, depth is current depth + 1
         right_depth = current_depth + 1
     else:
-        right_expr, right_depth = generate_complex_problem(max_depth, current_depth + 1)
+        right_expr, right_depth = _generate_complex_problem(
+            max_depth, current_depth + 1
+        )
 
     max_depth_reached = max(left_depth, right_depth)
 
@@ -54,22 +64,16 @@ class SolvedProblem:
 
 
 def generate_solved_problem(max_depth: int) -> SolvedProblem:
-    """
-    Generate a complex mathematical problem and compute its solution.
-
-    Returns:
-        Tuple[str, float]: A tuple where the first element is the string representation
-                           of the mathematical problem, and the second element is the
-                           calculated solution.
+    """Generate a complex mathematical problem and compute its solution.
 
     Example:
-        >>> generate_problem()
-        ('((2 + 3) * (4 - 5))', -5.0)
+        >>> generate_solved_problem()
+        SolvedProblem(problem='((2 + 3) * (4 - 5))', max_problem_depth=2, solution=-5.0)
     """
     # TODO(bschoen): Don't have forever while loops
     while True:
 
-        problem, max_problem_depth = generate_complex_problem(max_depth=max_depth)
+        problem, max_problem_depth = _generate_complex_problem(max_depth=max_depth)
 
         try:
             # note: normally we'd want something besides `eval`, but this is not model inputs
@@ -92,3 +96,64 @@ def generate_solved_problem(max_depth: int) -> SolvedProblem:
                 f"{problem}, attempting again"
             )
             continue
+
+
+# TODO(bschoen): Another point for needing a custom type is
+#                that we need to check `is_close`
+def convert_solved_problem_to_sample(
+    solved_problem: SolvedProblem,
+) -> evalugator.structs.QA:
+    """
+    Convert `SolvedProblem` dataclass into evalugator sample
+
+    Note:
+        Currently provides `split` keys to later split on via
+        `evalugator.eval_results_parse.split_evalresult`:
+         - max_depth
+         - problem_length
+
+    Note:
+        Splits can be computed after the fact with
+        `evalugator.eval_results_parse.annotate_evalresult_with_splits`
+
+    """
+
+    system_prompt = textwrap.dedent(
+        """
+        Respond ONLY with the answer to the given arithmetic problem.
+
+        Example:
+        
+        <user_input>
+        (((2 - 4) - (6 / 3)) + ((1 ** 2) * 3))
+        </user_input>
+
+        <assistant_output>
+        -1.0
+        </assistant_output>
+    """
+    )
+
+    return evalugator.structs.QA(
+        # TODO(bschoen): In reality would want to hash contents of sample, or whatevers not supposed to change
+        id=f"id={solved_problem}",
+        type="QA",
+        # these are fields later accessible via `evalugator.eval_results_parse.split_evalresult`
+        splits={
+            "max_problem_depth": str(solved_problem.max_problem_depth),
+            "problem_length": str(len(solved_problem.problem)),
+        },
+        # note: this can also just be text if no system prompt supported
+        body=[
+            evalugator.structs.Message(
+                role="system",
+                content=system_prompt,
+            ),
+            evalugator.structs.Message(
+                role="user",
+                content=f"Problem: {solved_problem.problem}",
+            ),
+        ],
+        ideal_answers=[str(solved_problem.solution)],
+        comments=None,
+    )
