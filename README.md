@@ -11,6 +11,8 @@ Table of Contents
 - [Evalugator](#evalugator)
   - [With Function Calling](#with-function-calling)
   - [Custom Evaluation](#custom-evaluation)
+- [Situational Awareness Dataset](#situational-awareness-dataset)
+
 
 
 Includes:
@@ -152,3 +154,12 @@ visualization.plot_heatmap(df)
 ```
 
 <img src="./images/example_eval_result_heatmap.png" width="600">
+
+
+## Situational Awareness Dataset
+
+> [!WARNING] As a precaution against unintentionally including anything from SAD in this repo, we do **not** have it as a submodule, and it instead must be cloned manually. It is also listed in `.gitignore`
+
+```bash
+> git clone https://github.com/LRudL/sad.git gpt_from_scratch/sad
+```

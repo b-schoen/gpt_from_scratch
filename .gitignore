@@ -9,6 +9,12 @@ __pycache__/
 # download cache
 download_cache/
 
+# everything in SAD dataset
+sad
+sad/
+**/sad
+**/sad/**/*
+
 # osx
 .DS_Store/
 .DS_Store
