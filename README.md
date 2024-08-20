@@ -156,3 +156,9 @@ Which generated the files
     └── templateextensions
         └── default.yaml
 ```
+
+We then create an `openai` provider with function calling support:
+
+<img src="./images/sparks_of_artifical_general_intelligence.png" width="600">
+
+Similar function calling and schema generation for `anthropic` (as well as tests) are provided as well

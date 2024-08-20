@@ -5,6 +5,7 @@ Functions around converting python callables to model tool use types.
 """
 
 import inspect
+import typing
 from typing import Callable, Type, TypedDict, NotRequired, Literal
 
 
@@ -27,8 +28,7 @@ def python_type_to_json_schema[T](typ: Type[T]) -> JsonSchemaDictFunctionParam:
     """
     Convert a Python type to a (non-recursive) JSON schema type.
 
-    We simply don't handle the recursive part because I don't think OpenAI's function calling
-    handles user defined types.
+    We simply don't handle the recursive part yet, openai's does already though.
 
     """
     if typ == str:
@@ -100,7 +100,7 @@ def generate_json_schema_for_function[
             "required": required,
             "additionalProperties": False,
         },
-        "strict": False,  # strict set as `False` in order to allow parallel function calls
+        "strict": True,  # strict set as `False` in order to allow parallel function calls
     }
 
     return schema
