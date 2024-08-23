@@ -21,6 +21,15 @@ from torch.nn import functional as F
 from jaxtyping import Float32, Int64
 
 
+def get_best_available_torch_device() -> torch.device:
+    if torch.cuda.is_available():
+        return torch.device("cuda")
+    elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+        return torch.device("mps")
+    else:
+        return torch.device("cpu")
+
+
 @dataclasses.dataclass(frozen=True)
 class GPTConfig:
     # max sequence length
@@ -331,7 +340,8 @@ class GPT(nn.Module):
     def forward(
         self,
         idx: Int64[torch.Tensor, "b t"],
-    ) -> Float32[torch.Tensor, "b t c"]:
+        target: Int64[torch.Tensor, "b t"] | None = None,
+    ) -> tuple[Float32[torch.Tensor, "b t c"], Float32[torch.Tensor, ""] | None]:
 
         # idx is of shape (B, T)
         B, T = idx.size()
@@ -343,6 +353,9 @@ class GPT(nn.Module):
             )
 
         # forward the token and posisition embeddings
+
+        # note: we can use the same device as another tensor, so don't have to
+        #       pass device everywhere
         pos = torch.arange(0, T, dtype=torch.long, device=idx.device)  # shape (T)
         pos_emb = self.transformer.wpe(pos)  # position embeddings of shape (T, n_embd)
         tok_emb = self.transformer.wte(idx)  # token embeddings of shape (B, T, n_embd)
@@ -360,5 +373,12 @@ class GPT(nn.Module):
         # forward through language model head (unembedding)
         logits = self.lm_head(x)  # (B, T, vocab_size)
 
+        # calculate `loss` (if `target` given, like during training`)
+        loss = None
+        if target is not None:
+            # again cross entropy doesn't like multidimensional input, so we flatten
+            # everything out
+            loss = F.cross_entropy(logits.view(-1, logits.size(-1)), target.view(-1))
+
         # "logits are just a softmax away from becoming probabilities"
-        return logits
+        return logits, loss

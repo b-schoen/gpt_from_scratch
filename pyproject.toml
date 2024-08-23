@@ -14,6 +14,7 @@ norecursedirs = ["evalugator", "sad"]
 [tool.flake8]
 max-line-length = 88 # match `black`
 ignore = [
+    "E203", # whitespace before ':', black disagrees
     "F722", # syntax error in forward method, pylint is wrong about this in jaxtyping
 ]
 
@@ -25,5 +26,4 @@ disable = [
     "C0116", # Missing function or method docstring
     "R0903", # Too few public methods (for small classes)
     "E1102", # not-callable, pylint is wrong about this way too often with torch.nn.functional
-    "F722",  # syntax error in forward method, pylint is wrong about this in jaxtyping
 ]
