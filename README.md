@@ -8,6 +8,7 @@ Table of Contents
   - [Colab: `colab/bigram_with_self_attention.py`](#colab-colabbigram_with_self_attentionpy)
 - [Lecture 8: Let's build the GPT Tokenizer](#lecture-8-lets-build-the-gpt-tokenizer)
   - [Byte Pair Encoder Tokenization](#byte-pair-encoder-tokenization)
+- [Lecture 9: Let's Build GPT-2 From Scratch](#lecture-9-lets-build-gpt-2-from-scratch)
 - [Evalugator](#evalugator)
   - [With Function Calling](#with-function-calling)
   - [Custom Evaluation](#custom-evaluation)
@@ -123,6 +124,8 @@ Make thy master.
 <img src="./images/example_byte_pair_encoding_tokenization.png" width="600">
 <img src="./images/example_byte_pair_encoding_tokenization_2.png" width="600">
 
+## Lecture 9: Let's Build GPT-2 From Scratch
+
 
 
 ## Evalugator
@@ -162,4 +165,17 @@ visualization.plot_heatmap(df)
 
 ```bash
 > git clone https://github.com/LRudL/sad.git gpt_from_scratch/sad
+> cd gpt_from_scratch/sad
+
+# Install dependencies. (these should already be a part of `gpt_from_scratch`, but including
+# here for completeness
+> pip install -e .
+
+# Unzip files necessary to run the tasks. See the section about unzip.sh for why you need that.
+> ./unzip.sh --exclude-evals
 ```
+
+Working, complete implementations with tests (anthropic variants in same repo):
+* [FunctionCallHandler](https://github.com/b-schoen/gpt_from_scratch/blob/main/gpt_from_scratch/evals/function_calling/openai/function_call_handler.py#L29)
+* [Evalugator - OpenAIFunctionCallingProvider](https://github.com/b-schoen/gpt_from_scratch/blob/main/gpt_from_scratch/evals/function_calling/openai/function_calling_provider.py#L38)
+* [generate_json_schema_for_function](https://github.com/b-schoen/gpt_from_scratch/blob/main/gpt_from_scratch/evals/function_calling/openai/schemas.py#L46)
