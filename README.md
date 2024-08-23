@@ -113,6 +113,8 @@ And there is no thing, no, not he's more much.
 RATCLIFF:
 Make thy master.
 ```
+
+---
   
 ## Lecture 8: Let's build the GPT Tokenizer
 
@@ -120,13 +122,18 @@ Make thy master.
 
 ### Byte Pair Encoder Tokenization
 
-
 <img src="./images/example_byte_pair_encoding_tokenization.png" width="600">
 <img src="./images/example_byte_pair_encoding_tokenization_2.png" width="600">
 
+---
+
 ## Lecture 9: Let's Build GPT-2 From Scratch
 
+[Ref Notebook](https://github.com/karpathy/build-nanogpt/blob/master/play.ipynb)
 
+[Ref Repo](https://github.com/karpathy/build-nanogpt)
+
+---
 
 ## Evalugator
 
