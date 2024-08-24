@@ -365,6 +365,23 @@ class GPT(nn.Module):
             std = 0.02
 
             # note: this is a flag we set in other modules for init lol
+            # lmao Karpathy: "there must be a better way"
+            #
+            # Why do this?
+            #
+            # Why do we normalize according to the number of layers in the residual stream?
+            #
+            #    import math
+            #
+            #    x = torch.zeros(768)
+            #    n = 100 # e.g. 100 layers
+            #
+            #    for i in range(n):
+            #        x = x + ((1 / math.sqrt(n)) * torch.randn(768))
+            #
+            #    # naive: gives 9.9 -> grows as sqrt(n)
+            #    # with 1/sqrt(n) normalization: ~1.0 -> stays constant around 1.0
+            #    print(x.std())
             if hasattr(module, "NANOGPT_SCALE_INIT"):
 
                 std *= (2 * self.config.n_layer) ** -0.5

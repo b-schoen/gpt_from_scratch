@@ -15,7 +15,10 @@ class DataLoaderLite:
         self.tokens = tokens
 
         print(f"loaded {len(self.tokens)} tokens")
-        print(f"1 epoch = {len(self.tokens) // (B * T)} batches")
+        print(
+            f"1 epoch = {len(self.tokens) // (B * T)} "
+            "batches (steps to make one pass through data)"
+        )
 
         # state
         self.current_position = 0
