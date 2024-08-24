@@ -113,3 +113,34 @@ def convert_return_value_to_json_string_wrapper[
         )
 
     return wrapper
+
+
+def closest_power_of_two(n: int) -> int:
+    # Find the power of 2 less than or equal to n
+    lower = 2 ** math.floor(math.log2(n))
+
+    # Find the power of 2 greater than n
+    upper = lower * 2
+
+    # Return the closest one
+    return lower if (n - lower) < (upper - n) else upper
+
+
+def next_power_of_two(n: int) -> int:
+
+    # Find the power of 2 greater than n
+    return 2 ** math.ceil(math.log2(n))
+
+
+# TODO(bschoen): Make this just return the index so can actually slice
+def get_first_n_examples(input_text: str, n: int, delimiter: str) -> str:
+    """Useful for taking slice of text delimited by a special token."""
+
+    examples = input_text.split(delimiter)
+
+    # Return all text if n is greater than available examples
+    if n > len(examples) - 1:
+        return input_text
+
+    result = delimiter.join(examples[:n]) + delimiter
+    return result.strip()

@@ -2,6 +2,7 @@ import os
 import requests
 import hashlib
 import pathlib
+from typing import Iterable
 
 
 def _generate_cached_filename_for_url(url: str) -> str:
@@ -39,3 +40,19 @@ def download_file_from_url(
 
     print(f"File downloaded and cached: {filepath}")
     return filepath
+
+
+def head(filepath: pathlib.Path, n: int) -> Iterable[str]:
+    """Equivalent to `head` command."""
+
+    with filepath.open() as f:
+
+        for _ in range(n):
+
+            line = f.readline()
+
+            # break if done
+            if not line:
+                break
+
+            yield line.rstrip("\n")

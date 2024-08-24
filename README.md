@@ -9,6 +9,7 @@ Table of Contents
 - [Lecture 8: Let's build the GPT Tokenizer](#lecture-8-lets-build-the-gpt-tokenizer)
   - [Byte Pair Encoder Tokenization](#byte-pair-encoder-tokenization)
 - [Lecture 9: Let's Build GPT-2 From Scratch](#lecture-9-lets-build-gpt-2-from-scratch)
+- [Custom Tokenization for TinyStories](#custom-tokenization-for-tinystories)
 - [Evalugator](#evalugator)
   - [With Function Calling](#with-function-calling)
   - [Custom Evaluation](#custom-evaluation)
@@ -132,6 +133,12 @@ Make thy master.
 [Ref Notebook](https://github.com/karpathy/build-nanogpt/blob/master/play.ipynb)
 
 [Ref Repo](https://github.com/karpathy/build-nanogpt)
+
+---
+
+## Custom Tokenization for TinyStories
+
+<img src="./images/example_custom_tinystories_tokenization.png" width="600">
 
 ---
 
