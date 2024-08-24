@@ -60,6 +60,7 @@ class CausalSelfAttention(nn.Module):
 
         # output projection
         self.c_proj = nn.Linear(config.n_embd, config.n_embd)
+        self.c_proj.NANOGPT_SCALE_INIT = 1
 
         # regularization
         self.n_head = config.n_head
@@ -334,7 +335,49 @@ class GPT(nn.Module):
         self.lm_head = nn.Linear(config.n_embd, config.vocab_size, bias=False)
 
         # weight sharing scheme
-        # self.transformer.wte.weight = self.lm_head.weight
+        # note: can tell this because they're using the same pointer
+        # actual approach comes from original attention paper
+        #
+        # this enforces that bottom and top of transformer
+        # - similar tokens have similar embeddings
+        # - similar embeddings have similar logits
+        # they observed this was happening naturally so just went ahead and tied them
+        #
+        # this is also absolutely massive (40M params, 30% params saved)
+        # meaning you can train it longer
+        self.transformer.wte.weight = self.lm_head.weight
+
+        # init params
+        self.apply(self._init_weights)
+
+    def _init_weights(self, module: nn.Module) -> None:
+        """Initialize weights according to source code
+
+        Note:
+            - Typically you'd want to initialize `std` with `1 / sqrt(n)` where `n` is
+              the number of features in the input tensor.
+            - 0.02 is roughly consistent with that for the d_model sizes in GPT-2
+
+        """
+
+        if isinstance(module, nn.Linear):
+
+            std = 0.02
+
+            # note: this is a flag we set in other modules for init lol
+            if hasattr(module, "NANOGPT_SCALE_INIT"):
+
+                std *= (2 * self.config.n_layer) ** -0.5
+
+            torch.nn.init.normal_(module.weight, mean=0.0, std=std)
+
+            if module.bias is not None:
+
+                torch.nn.init.zeros_(module.bias)
+
+        elif isinstance(module, nn.Embedding):
+
+            torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
 
     # `idx` := token indices
     def forward(
