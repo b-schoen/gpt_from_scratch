@@ -13,7 +13,7 @@ R = TypeVar("R")
 
 # non-recursive json-type (since mypy doesn't really support recursive types well)
 # intended only internally for use by functions in this file, not a general json type annotation
-type _JsonDict = dict[str, Any] | list[Any] | str | int | float | bool | None
+_JsonDict = dict[str, Any] | list[Any] | str | int | float | bool | None
 
 
 # TODO(bschoen): The complexity here is another case for these being actual
