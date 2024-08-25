@@ -1,6 +1,6 @@
 import enum
 import dataclasses
-from typing import Iterator, Callable
+from typing import Iterator, Callable, TypeVar, Generic
 import io
 import pathlib
 
@@ -12,15 +12,18 @@ import huggingface_hub
 import torch
 from torch.utils.data import IterableDataset, DataLoader
 
+T = TypeVar("T")
+R = TypeVar("R")
+
 
 @dataclasses.dataclass(frozen=True)
-class TrainAndVal[T]:
+class TrainAndVal(Generic[T]):
     """Helper for common pattern of transforming both train and val."""
 
     train: T
     val: T
 
-    def apply[R](self, func: Callable[[T], R]) -> "TrainAndVal[R]":
+    def apply(self, func: Callable[[T], R]) -> "TrainAndVal[R]":
 
         return dataclasses.replace(
             self,
