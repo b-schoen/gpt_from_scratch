@@ -7,8 +7,9 @@ import json
 import inspect
 import math
 
-# P = ParamSpec("P")
-# R = TypeVar("R")
+P = ParamSpec("P")
+T = TypeVar("T")
+R = TypeVar("R")
 
 # non-recursive json-type (since mypy doesn't really support recursive types well)
 # intended only internally for use by functions in this file, not a general json type annotation
@@ -17,9 +18,10 @@ type _JsonDict = dict[str, Any] | list[Any] | str | int | float | bool | None
 
 # TODO(bschoen): The complexity here is another case for these being actual
 #                class instances, especially when need state management.
-def wraps_partial[
-    **P, R, T
-](func: Callable[Concatenate[T, P], R], arg: T,) -> Callable[P, R]:
+def wraps_partial(
+    func: Callable[Concatenate[T, P], R],
+    arg: T,
+) -> Callable[P, R]:
     """`functools.partial` but extended to pass __doc__, __name__, and __annotations__ like `wraps`.
 
     Example:
@@ -61,7 +63,7 @@ def wraps_partial[
     return wrapper
 
 
-def _dataclass_to_json_dict[T](obj: T) -> _JsonDict:
+def _dataclass_to_json_dict(obj: T) -> _JsonDict:
     """Convert a (potentially nested) dataclass to a json-serializable dictionary."""
 
     if dataclasses.is_dataclass(obj):
@@ -79,9 +81,9 @@ def _dataclass_to_json_dict[T](obj: T) -> _JsonDict:
         raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
 
 
-def convert_return_value_to_json_string_wrapper[
-    **P, R
-](func: Callable[P, R]) -> Callable[P, str]:
+def convert_return_value_to_json_string_wrapper(
+    func: Callable[P, R]
+) -> Callable[P, str]:
     """Wrapper to convert return value of a function to JSON, handling potentially nested dataclasses.
 
     Useful for the function calling APIs, which expect json strings, but we don't want
