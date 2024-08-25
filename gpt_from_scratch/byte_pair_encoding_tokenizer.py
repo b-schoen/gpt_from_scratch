@@ -2,7 +2,9 @@ import dataclasses
 from typing import Sequence, TypeVar
 import collections
 import pathlib
+
 import regex as re
+import tqdm
 
 TokenInt = int
 Byte = bytes
@@ -448,11 +450,13 @@ class BytePairEncodingWordTokenizer:
 
         # Use the regex to split the text into (approximately) words
         regex_split_pattern = re.compile(self.regex_split_pattern_string)
+
+        print(f"Splitting text into words via regex...")
         words = regex_split_pattern.findall(text)
 
         tokens = []
 
-        for word in words:
+        for word in tqdm.tqdm(iterable=words, desc="Encoding words as tokens"):
 
             # handle special tokens
             if word in self.special_tokens_dict:
