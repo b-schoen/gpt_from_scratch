@@ -1,11 +1,13 @@
 import dataclasses
-from typing import Self, Sequence
+from typing import Self, Sequence, TypeVar
 import collections
 import pathlib
 import regex as re
 
-type TokenInt = int
-type Byte = bytes
+TokenInt = int
+Byte = bytes
+
+T = TypeVar("T")
 
 # so the strategy is we'll start merging
 # - we know we can start at 256, since
@@ -16,7 +18,7 @@ def pair_to_char(pair: tuple[int, int]) -> tuple[str, str]:
     return (chr(pair[0]), chr(pair[1]))
 
 
-def get_pair_counts[T](sequence: Sequence[T]) -> dict[tuple[T, T], int]:
+def get_pair_counts(sequence: Sequence[T]) -> dict[tuple[T, T], int]:
 
     # default count to 0
     pair_counts: dict[tuple[T, T], int] = collections.defaultdict(int)
@@ -30,7 +32,7 @@ def get_pair_counts[T](sequence: Sequence[T]) -> dict[tuple[T, T], int]:
 
 # TODO(bschoen): This has got to be insanely slow
 #                - probably fine since only doing once
-def merge[T](tokens: list[T], pair: tuple[T, T], new_token: T) -> list[T]:
+def merge(tokens: list[T], pair: tuple[T, T], new_token: T) -> list[T]:
     """
     Merge a pair of tokens into a new token.
 
