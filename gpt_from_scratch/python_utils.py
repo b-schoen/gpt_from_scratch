@@ -5,6 +5,7 @@ import functools
 import dataclasses
 import json
 import inspect
+import math
 
 # P = ParamSpec("P")
 # R = TypeVar("R")

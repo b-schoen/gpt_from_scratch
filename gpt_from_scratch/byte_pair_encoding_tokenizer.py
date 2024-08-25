@@ -73,16 +73,7 @@ def show_top_pair_counts(
 
 @dataclasses.dataclass(frozen=True)
 class BytePairEncodingTokenizer:
-    """
-    Byte Pair Encoding Tokenizer using BPE merge to merge bytes.
-
-    Note:
-        - Use `from_input_bytes` for character level models.
-        - Use `from_input_text` for anything above character level models.
-        - For simplicity for now, we'll assume all special tokens match the
-          regex pattern used by Chat ML (ex: <|...|>).
-
-    """
+    """Byte Pair Encoding Tokenizer using BPE merge (over characters)."""
 
     vocab: dict[int, bytes]
     merges: dict[tuple[int, int], int]
@@ -96,7 +87,6 @@ class BytePairEncodingTokenizer:
         # ex: GPT-4 uses ~100,000 tokens
         vocab_size: int,
     ) -> Self:
-        """From input bytes, mostly useful for character models, since otherwise we also want to split based on regex."""
 
         tokens: list[int] = list(input_bytes)
 
@@ -256,7 +246,13 @@ class BytePairEncodingWordTokenizer:
     # ex: {(b't', b'h'): 278, (b'i', b'n'): 279, ...}
     merges: dict[bytes, TokenInt]
 
-    regex_split_pattern: re.Pattern[str]
+    # note: we leave this as a string for easy serialization / deserialization
+    #       of the tokenizer, with the slight performance cost of having to
+    #       recompile during encode, but that's fairly infrequent in training
+    #       and worth avoiding the cost of complexity
+    regex_split_pattern_string: str
+
+    special_tokens_dict: dict[str, TokenInt]
 
     # TODO(bschoen): Name this `train`? That gets really confusing, still
     #                want it to be general though (as a larger rule,
@@ -267,6 +263,7 @@ class BytePairEncodingWordTokenizer:
         input_text: str,
         regex_split_pattern_string: str,
         vocab_size: int,
+        special_tokens: frozenset[str] | None = None,
     ) -> Self:
         """
         Useful for anything above character level models.
@@ -278,6 +275,8 @@ class BytePairEncodingWordTokenizer:
 
         """
 
+        special_tokens = special_tokens or set()
+
         regex_split_pattern = re.compile(regex_split_pattern_string)
 
         # original bytes
@@ -287,18 +286,29 @@ class BytePairEncodingWordTokenizer:
         #
         # split to where there's one byte per letter in each "word"
         words: list[list[Byte]] = [
-            [bytes([b]) for b in word.encode("utf-8")]
+            # skip special tokens(as we don't want those merged), and they're handled
+            # already before the merges start when `special_tokens_dict` is constructed
+            [bytes([b]) for b in word.encode("utf-8") if word not in special_tokens]
             for word in re.findall(regex_split_pattern, input_text)
         ]
 
         original_avg_word_length = sum(len(word) for word in words) / len(words)
 
-        # first unused int value (since bytes are 0..255)
-        first_unused_int_value: int = 256
-
         print(f"Constructing {vocab_size=} from {len(words)} unmerged words...")
         merges: dict[bytes, TokenInt] = {v: k for k, v in vocab.items()}
 
+        # First add special tokens to vocab and merges
+        special_tokens_dict: dict[str, TokenInt] = {}
+        for token in special_tokens:
+            if len(vocab) >= vocab_size:
+                break
+            new_token = len(vocab)
+            token_bytes = token.encode("utf-8")
+            vocab[new_token] = token_bytes
+            merges[token_bytes] = new_token
+            special_tokens_dict[token] = new_token
+
+        # now iteratively apply merges of most frequent pair
         while len(vocab) < vocab_size:
 
             # Find the most common pair. This will become our next token
@@ -325,8 +335,7 @@ class BytePairEncodingWordTokenizer:
             merged_bytes: bytes = top_pair[0] + top_pair[1]
 
             # ex: new_token = 278
-            step = len(merges)
-            new_token: TokenInt = first_unused_int_value + step
+            new_token: TokenInt = len(vocab) + 1
 
             # keep track of merges (and their order)
             #
@@ -384,16 +393,30 @@ class BytePairEncodingWordTokenizer:
         )
 
         print(f"Constructed `{cls.__name__}`")
-        return cls(vocab=vocab, merges=merges, regex_split_pattern=regex_split_pattern)
+        return cls(
+            vocab=vocab,
+            merges=merges,
+            regex_split_pattern_string=regex_split_pattern_string,
+            special_tokens_dict=special_tokens_dict,
+        )
 
     def encode(self, text: str) -> list[TokenInt]:
 
         # Use the regex to split the text into (approximately) words
-        words = self.regex_split_pattern.findall(text)
+        regex_split_pattern = re.compile(self.regex_split_pattern_string)
+        words = regex_split_pattern.findall(text)
 
         tokens = []
 
         for word in words:
+
+            # handle special tokens
+            if word in self.special_tokens_dict:
+                token = self.special_tokens_dict[word]
+                tokens.append(token)
+                continue
+
+            # otherwise we've got non special tokens
 
             # Turn each word into tokens, using the byte pair encoding algorithm
             word_bytes = word.encode("utf-8")

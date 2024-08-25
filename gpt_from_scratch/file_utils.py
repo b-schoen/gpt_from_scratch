@@ -2,7 +2,10 @@ import os
 import requests
 import hashlib
 import pathlib
-from typing import Iterable
+from typing import Iterable, Type
+import dataclasses
+import json
+import pickle
 
 
 def _generate_cached_filename_for_url(url: str) -> str:
@@ -56,3 +59,45 @@ def head(filepath: pathlib.Path, n: int) -> Iterable[str]:
                 break
 
             yield line.rstrip("\n")
+
+
+def write_to_json_file[T](data: T, file_path: str) -> None:
+    with open(file_path, "wt") as f:
+        json.dump(data, f, indent=2)
+
+
+def read_from_json_file[T](file_path: str) -> T:
+    with open(file_path, "rt") as f:
+        return json.load(f)
+
+
+def write_to_pickle_file[T](data: T, file_path: str) -> None:
+    with open(file_path, "wb") as f:
+        pickle.dump(data, f)
+
+
+def read_from_pickle_file[T](file_path: str) -> T:
+    with open(file_path, "rb") as f:
+        return pickle.load(f)
+
+
+def serialize_dataclass_to_pickle_file[T](instance: T, file_path: str) -> None:
+    write_to_pickle_file(data=instance, file_path=file_path)
+
+
+def deserialize_dataclass_from_pickle_file[T](cls: Type[T], file_path: str) -> T:
+    return read_from_pickle_file(file_path)
+
+
+def serialize_dataclass_to_json_file[T](instance: T, file_path: str) -> None:
+
+    assert dataclasses.is_dataclass(instance)
+
+    write_to_json_file(data=dataclasses.asdict(instance), file_path=file_path)
+
+
+def deserialize_dataclass_from_json_file[T](cls: Type[T], file_path: str) -> T:
+
+    instance_as_json = read_from_json_file(file_path)
+
+    return cls(**instance_as_json)
