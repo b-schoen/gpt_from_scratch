@@ -216,6 +216,48 @@ def bpe_encode(
     return tokens
 
 
+class RegexSplitPatterns:
+
+    # TODO(bschoen): More general handling of special tokens? Is this okay? We actually
+    #                still want to split this (so it needs to be in the regex pattern)
+    #                but we don't want them merged during `bpe_merge`
+    #
+    #                This means we can assume that special tokens come in already split
+    #                as an exact match (even if in a public api we'd want to construct
+    #                this regex automatically for the user given special tokens)
+    CUSTOM_TINYSTORIES = "|".join(
+        [
+            # Match whole words
+            #
+            #   \b    - Represents a word boundary (transition from a non-word char to
+            #            a word char or vice versa)
+            #   \w+   - Matches one or more word characters (letters, digits, or underscores)
+            #   \b    - Another word boundary to ensure we match whole words
+            #
+            r"\b\w+\b",
+            #
+            # Match single punctuation marks
+            #
+            #   []       - Character set: match any single character listed inside the brackets
+            #   .,!?;:"  - The actual characters we want to match (various punctuation marks)
+            #
+            r'[.,!?;:"]',
+            #
+            # Match one or more whitespace characters  (spaces, tabs)
+            #
+            r"\s+",
+            #
+            # Match the newline character
+            #
+            r"\n",
+            #
+            # Match the special end-of-text token exactly
+            #
+            r"<\|endoftext\|>",
+        ]
+    )
+
+
 @dataclasses.dataclass(frozen=True)
 class BytePairEncodingWordTokenizer:
     """
