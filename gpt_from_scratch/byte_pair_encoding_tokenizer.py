@@ -1,5 +1,5 @@
 import dataclasses
-from typing import Self, Sequence, TypeVar
+from typing import Sequence, TypeVar
 import collections
 import pathlib
 import regex as re
@@ -88,7 +88,7 @@ class BytePairEncodingTokenizer:
         # note: vocabulary size is a hyperparameter
         # ex: GPT-4 uses ~100,000 tokens
         vocab_size: int,
-    ) -> Self:
+    ) -> "BytePairEncodingTokenizer":
 
         tokens: list[int] = list(input_bytes)
 
@@ -308,7 +308,7 @@ class BytePairEncodingWordTokenizer:
         regex_split_pattern_string: str,
         vocab_size: int,
         special_tokens: frozenset[str] | None = None,
-    ) -> Self:
+    ) -> "BytePairEncodingTokenizer":
         """
         Useful for anything above character level models.
 
