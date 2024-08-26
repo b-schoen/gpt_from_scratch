@@ -147,3 +147,12 @@ def get_first_n_examples(input_text: str, n: int, delimiter: str) -> str:
 
     result = delimiter.join(examples[:n]) + delimiter
     return result.strip()
+
+
+def print_json(value: T) -> None:
+    """Print given value as json, for convenience first will convert dataclasses to dicts."""
+
+    if dataclasses.is_dataclass(value):
+        value = dataclasses.asdict(value)
+
+    print(json.dumps(value, indent=2))

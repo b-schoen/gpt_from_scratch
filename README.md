@@ -1,4 +1,5 @@
-GPT from scratch via https://github.com/karpathy/nn-zero-to-hero
+GPT from scratch via https://github.com/karpathy/nn-zero-to-hero, which has since
+evolved into a more general workspace.
 
 
 Table of Contents
@@ -11,6 +12,7 @@ Table of Contents
 - [Lecture 9: Let's Build GPT-2 From Scratch](#lecture-9-lets-build-gpt-2-from-scratch)
 - [Custom Tokenization for TinyStories](#custom-tokenization-for-tinystories)
 - [Example Dictionary Learning From Scratch With 2D Visualization](#example-dictionary-learning-from-scratch-with-2d-visualization)
+- [GemmaScope / SAELens usage](#gemmascope--saelens-usage)
 - [Evalugator](#evalugator)
   - [With Function Calling](#with-function-calling)
   - [Custom Evaluation](#custom-evaluation)
@@ -146,6 +148,15 @@ Make thy master.
 ## Example Dictionary Learning From Scratch With 2D Visualization
 
 <img src="./images/example_dictionary_learning.png" width="600">
+
+---
+
+## GemmaScope / SAELens usage
+
+<img src="./images/example_circuitsviz_usage.png" width="600">
+
+<img src="./images/example_using_nueronpedia.png" width="600">
+
 
 ---
 
