@@ -10,6 +10,7 @@ Table of Contents
   - [Byte Pair Encoder Tokenization](#byte-pair-encoder-tokenization)
 - [Lecture 9: Let's Build GPT-2 From Scratch](#lecture-9-lets-build-gpt-2-from-scratch)
 - [Custom Tokenization for TinyStories](#custom-tokenization-for-tinystories)
+- [Example Dictionary Learning From Scratch With 2D Visualization](#example-dictionary-learning-from-scratch-with-2d-visualization)
 - [Evalugator](#evalugator)
   - [With Function Calling](#with-function-calling)
   - [Custom Evaluation](#custom-evaluation)
@@ -139,6 +140,12 @@ Make thy master.
 ## Custom Tokenization for TinyStories
 
 <img src="./images/example_custom_tinystories_tokenization.png" width="600">
+
+---
+
+## Example Dictionary Learning From Scratch With 2D Visualization
+
+<img src="./images/example_dictionary_learning.png" width="600">
 
 ---
 
