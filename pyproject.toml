@@ -7,8 +7,15 @@ requires-python = ">=3.12"
 [tool.pytest.ini_options]
 addopts = ["--import-mode=importlib", "--maxfail=1", "-s"]
 
-# don't want to recurse 3rd party libs
-norecursedirs = ["evalugator", "sad"]
+
+norecursedirs = [
+    # don't want to recurse 3rd party libs
+    "evalugator",
+    "sad",
+    # skipping now that not actively working on this, since it has a dependency
+    # on evalugator which has a bunch of incompatible dependencies with transformerlens
+    "tests/evals",
+]
 
 # note: need `pip install flake8-pyproject` for this to work
 [tool.flake8]
