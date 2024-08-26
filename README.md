@@ -13,6 +13,7 @@ Table of Contents
 - [Custom Tokenization for TinyStories](#custom-tokenization-for-tinystories)
 - [Example Dictionary Learning From Scratch With 2D Visualization](#example-dictionary-learning-from-scratch-with-2d-visualization)
 - [GemmaScope / SAELens usage](#gemmascope--saelens-usage)
+- [Toy Problem With Hooked Transformer](#toy-problem-with-hooked-transformer)
 - [Evalugator](#evalugator)
   - [With Function Calling](#with-function-calling)
   - [Custom Evaluation](#custom-evaluation)
@@ -157,7 +158,34 @@ Make thy master.
 
 <img src="./images/example_using_nueronpedia.png" width="600">
 
+---
 
+## Toy Problem With Hooked Transformer
+
+[Notebook](./toy_problem_hooked_transformer.ipynb)
+
+We'll use the problem of predicting the next token in palindromes (ex: `<abc|cba>`)
+
+We'll use a small naive tokenizer (just mapping vocab to indices in order)
+
+<img src="./images/example_toy_problem_hooked_transformer_0.png" width="500">
+ 
+We then:
+* Generate all palindromes of this form for a given length
+* Split into `train / test`
+* Train a hooked transformer on the `train` set
+* Sanity check a result from the `test` set
+
+| Before `\|` Token                                                             | After `\|` Token                                                              |
+| ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| Rougly equal confidence across tokens, since these are arbitrary              | High confidence in correct token (reverse of tokens preceding `\|`)           |
+| <img src="./images/example_toy_problem_hooked_transformer_2.png" width="500"> | <img src="./images/example_toy_problem_hooked_transformer_3.png" width="500"> |
+
+
+
+
+
+ 
 ---
 
 ## Evalugator
