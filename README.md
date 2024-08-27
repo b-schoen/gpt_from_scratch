@@ -182,8 +182,11 @@ We then:
 | <img src="./images/example_toy_problem_hooked_transformer_2.png" width="500"> | <img src="./images/example_toy_problem_hooked_transformer_3.png" width="500"> |
 
 
+<img src="./images/example_toy_problem_attention_heads.png" width="500">
 
+<img src="./images/example_toy_problem_attention_out.gif" width="500"> 
 
+<img src="./images/example_toy_model_circuitsviz_model_performance.png" width="500">
 
  
 ---
