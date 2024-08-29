@@ -4,6 +4,7 @@ evolved into a more general workspace.
 
 Table of Contents
 
+- [Lecture 2: The spelled-out intro to language modeling: building makemore](#lecture-2-the-spelled-out-intro-to-language-modeling-building-makemore)
 - [Lecture 7: Let's build GPT: from scratch, in code, spelled out.](#lecture-7-lets-build-gpt-from-scratch-in-code-spelled-out)
   - [Code:  `gpt_from_scratch/bigram_with_self_attention.py`](#code--gpt_from_scratchbigram_with_self_attentionpy)
   - [Colab: `colab/bigram_with_self_attention.py`](#colab-colabbigram_with_self_attentionpy)
@@ -32,9 +33,13 @@ Running tests:
 python -m pytest
 ```
 
+## Lecture 2: The spelled-out intro to language modeling: building makemore
+
+[Ref Notebook](https://github.com/karpathy/nn-zero-to-hero/blob/master/lectures/makemore/makemore_part1_bigrams.ipynb)
+
 ## Lecture 7: Let's build GPT: from scratch, in code, spelled out.
 
-[Colab notebook](https://colab.research.google.com/drive/1JMLa53HDuA-i7ZBmqV7ZnA3c_fvtXnx-?usp=sharing#scrollTo=h5hjCcLDr2WC)
+[Ref Colab notebook](https://colab.research.google.com/drive/1JMLa53HDuA-i7ZBmqV7ZnA3c_fvtXnx-?usp=sharing#scrollTo=h5hjCcLDr2WC)
 
 ### Code:  `gpt_from_scratch/bigram_with_self_attention.py`
 
