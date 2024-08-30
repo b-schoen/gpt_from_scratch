@@ -5,6 +5,7 @@ evolved into a more general workspace.
 Table of Contents
 
 - [Lecture 2: The spelled-out intro to language modeling: building makemore](#lecture-2-the-spelled-out-intro-to-language-modeling-building-makemore)
+  - [Getting Model Weights To Replicate Bigram Model](#getting-model-weights-to-replicate-bigram-model)
 - [Lecture 7: Let's build GPT: from scratch, in code, spelled out.](#lecture-7-lets-build-gpt-from-scratch-in-code-spelled-out)
   - [Code:  `gpt_from_scratch/bigram_with_self_attention.py`](#code--gpt_from_scratchbigram_with_self_attentionpy)
   - [Colab: `colab/bigram_with_self_attention.py`](#colab-colabbigram_with_self_attentionpy)
@@ -36,6 +37,11 @@ python -m pytest
 ## Lecture 2: The spelled-out intro to language modeling: building makemore
 
 [Ref Notebook](https://github.com/karpathy/nn-zero-to-hero/blob/master/lectures/makemore/makemore_part1_bigrams.ipynb)
+
+### Getting Model Weights To Replicate Bigram Model
+
+<img src="./images/example_building_makemore_model_weights.png" width="600">
+<img src="./images/example_building_makemore_bigram_counts_token_probs.png" width="600">
 
 ## Lecture 7: Let's build GPT: from scratch, in code, spelled out.
 
