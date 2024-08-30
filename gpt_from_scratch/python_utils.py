@@ -7,6 +7,8 @@ import json
 import inspect
 import math
 
+import tabulate
+
 P = ParamSpec("P")
 T = TypeVar("T")
 R = TypeVar("R")
@@ -156,3 +158,9 @@ def print_json(value: T) -> None:
         value = dataclasses.asdict(value)
 
     print(json.dumps(value, indent=2))
+
+
+def print_table(iterable: T) -> None:
+    """Print given rows as a table, for convenience."""
+
+    print(tabulate.tabulate(iterable))
