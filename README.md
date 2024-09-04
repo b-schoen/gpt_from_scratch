@@ -16,6 +16,9 @@ Table of Contents
 - [Example Dictionary Learning From Scratch With 2D Visualization](#example-dictionary-learning-from-scratch-with-2d-visualization)
 - [GemmaScope / SAELens usage](#gemmascope--saelens-usage)
 - [Toy Problem With Hooked Transformer](#toy-problem-with-hooked-transformer)
+- [Scaling Laws](#scaling-laws)
+  - [MSE Loss (Regression)](#mse-loss-regression)
+  - [CrossEntropy Loss (Classification)](#crossentropy-loss-classification)
 - [Evalugator](#evalugator)
   - [With Function Calling](#with-function-calling)
   - [Custom Evaluation](#custom-evaluation)
@@ -199,7 +202,20 @@ We then:
 
 <img src="./images/example_toy_model_circuitsviz_model_performance.png" width="500">
 
- 
+---
+
+## Scaling Laws
+
+Here we look at wandb sweeps across model scale for a few toy problems:
+
+### MSE Loss (Regression)
+
+<img src="./images/example_scaling_mse.png" width="500"> 
+
+### CrossEntropy Loss (Classification)
+
+<img src="./images/example_scaling_crossentropy.png" width="500"> 
+
 ---
 
 ## Evalugator
