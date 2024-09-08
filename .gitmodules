@@ -4,3 +4,6 @@
 [submodule "gpt_from_scratch/evalugator"]
 	path = gpt_from_scratch/evalugator
 	url = https://github.com/LRudL/evalugator.git
+[submodule "gpt_from_scratch/refusal_direction"]
+	path = gpt_from_scratch/refusal_direction
+	url = https://github.com/andyrdt/refusal_direction.git
