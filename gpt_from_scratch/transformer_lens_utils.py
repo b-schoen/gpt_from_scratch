@@ -2,6 +2,7 @@ import torch
 import transformer_lens
 
 from jaxtyping import Float
+from typing import Callable
 
 import functools
 
@@ -60,7 +61,9 @@ def get_act_patch_resid_pre(
     # SOLUTION
     model.reset_hooks()
     seq_len = corrupted_tokens.size(1)
-    results = t.zeros(model.cfg.n_layers, seq_len, device=device, dtype=t.float32)
+    results = torch.zeros(
+        model.cfg.n_layers, seq_len, device=device, dtype=torch.float32
+    )
 
     for layer in tqdm(range(model.cfg.n_layers)):
         for position in range(seq_len):
@@ -93,8 +96,8 @@ def get_act_patch_block_every(
     """
     # SOLUTION
     model.reset_hooks()
-    results = t.zeros(
-        3, model.cfg.n_layers, tokens.size(1), device=device, dtype=t.float32
+    results = torch.zeros(
+        3, model.cfg.n_layers, tokens.size(1), device=device, dtype=torch.float32
     )
 
     for component_idx, component in enumerate(["resid_pre", "attn_out", "mlp_out"]):
@@ -146,9 +149,7 @@ def get_act_patch_attn_head_out_all_pos(
     """
     # SOLUTION
     model.reset_hooks()
-    results = t.zeros(
-        model.cfg.n_layers, model.cfg.n_heads, device=device, dtype=t.float32
-    )
+    results = torch.zeros(model.cfg.n_layers, model.cfg.n_heads, dtype=torch.float32)
 
     for layer in tqdm(range(model.cfg.n_layers)):
         for head in range(model.cfg.n_heads):
@@ -195,12 +196,12 @@ def get_act_patch_attn_head_all_pos_every(
     called on the model's logit output.
     """
     # SOLUTION
-    results = t.zeros(
+    results = torch.zeros(
         5,
         model.cfg.n_layers,
         model.cfg.n_heads,
         device=device,
-        dtype=t.float32,
+        dtype=torch.float32,
     )
     # Loop over each component in turn
     for component_idx, component in enumerate(["z", "q", "k", "v", "pattern"]):
