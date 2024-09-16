@@ -252,6 +252,10 @@ Breaking it down by attention head and MLP:
 <img src="./images/example_toy_model_contrastive_pairs_per_head_2.png" width="500">
 <img src="./images/example_toy_model_contrastive_pairs_per_head.png" width="500">
 
+Looking at a single example, we can even see attention head formation:
+
+<img src="./images/example_toy_models_sorted_attention_head_evolution.gif" width="1000">
+
 
 ---
 
