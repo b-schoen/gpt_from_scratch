@@ -16,6 +16,7 @@ Table of Contents
 - [Example Dictionary Learning From Scratch With 2D Visualization](#example-dictionary-learning-from-scratch-with-2d-visualization)
 - [GemmaScope / SAELens usage](#gemmascope--saelens-usage)
 - [Toy Problem With Hooked Transformer](#toy-problem-with-hooked-transformer)
+  - [Probing](#probing)
 - [Scaling Laws](#scaling-laws)
   - [MSE Loss (Regression)](#mse-loss-regression)
   - [CrossEntropy Loss (Classification)](#crossentropy-loss-classification)
@@ -201,6 +202,56 @@ We then:
 <img src="./images/example_toy_problem_attention_out.gif" width="500"> 
 
 <img src="./images/example_toy_model_circuitsviz_model_performance.png" width="500">
+
+### Probing
+
+We'll now look at toy model trained on sorting a small string:
+
+```
+<adcb|abcd>
+```
+
+First, we'll look for some probes that we expect our transformer to represent linearly in the
+residual stream, for example:
+ * Probe each layer of the residual stream for the first sorted character
+ * Probe each layer of the residual stream for the second sorted character
+ * ...
+
+<img src="./images/example_toy_model_sorted_linear_probe_heatmap.png" width="500">
+<img src="./images/example_toy_model_sorted_linear_probe_line_plot.png" width="500">
+
+Great! Now we can take a closer look at the first sorted position:
+
+<img src="./images/example_toy_model_activation_patching_mlp_heatmap.png" width="400">
+<img src="./images/example_toy_model_activation_patching_mlp_per_layer_per_position.png" width="500">
+
+Here we're using contrastive pairs, looking at:
+
+```python
+# take an example, modify the first part of the sequence reversal to be wrong
+input_string = "<bacd|ab"
+correct_string = f"{input_string}c"
+incorrect_string = f"{input_string}d"
+```
+
+<img src="./images/example_toy_models_contrastive_pairs_correct_logits_at_position.png" width="1000">
+
+<img src="./images/example_toy_models_contrastive_pairs_incorrect_logits_at_position.png" width="1000">
+
+
+We can then trace that through the residual stream:
+
+<img src="./images/example_toy_model_contrastive_pairs_residual_stream_accumulated.png" width="500">
+<img src="./images/example_toy_model_contrastive_pairs_residual_stream_difference_each_layer.png" width="500">
+
+
+Breaking it down by attention head and MLP:
+
+<img src="./images/example_toy_model_contrastive_pairs_res_attn_mlp.png" width="500">
+
+<img src="./images/example_toy_model_contrastive_pairs_per_head_2.png" width="500">
+<img src="./images/example_toy_model_contrastive_pairs_per_head.png" width="500">
+
 
 ---
 
