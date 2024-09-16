@@ -4,6 +4,8 @@ import transformer_lens
 from jaxtyping import Float
 from typing import Callable
 
+from tqdm import tqdm
+
 import functools
 
 
