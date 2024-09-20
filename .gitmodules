@@ -7,3 +7,12 @@
 [submodule "gpt_from_scratch/refusal_direction"]
 	path = gpt_from_scratch/refusal_direction
 	url = https://github.com/andyrdt/refusal_direction.git
+[submodule "gpt_from_scratch/sycophancy-to-subterfuge-paper"]
+	path = gpt_from_scratch/sycophancy-to-subterfuge-paper
+	url = https://github.com/anthropics/sycophancy-to-subterfuge-paper.git
+[submodule "gpt_from_scratch/sleeper-agents-paper"]
+	path = gpt_from_scratch/sleeper-agents-paper
+	url = https://github.com/anthropics/sleeper-agents-paper.git
+[submodule "gpt_from_scratch/ARENA_3.0"]
+	path = gpt_from_scratch/ARENA_3.0
+	url = https://github.com/callummcdougall/ARENA_3.0.git
