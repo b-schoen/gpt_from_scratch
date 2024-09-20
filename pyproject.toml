@@ -34,3 +34,8 @@ disable = [
     "R0903", # Too few public methods (for small classes)
     "E1102", # not-callable, pylint is wrong about this way too often with torch.nn.functional
 ]
+
+[tool.ruff.lint]
+ignore = [
+    "F722", # type annotations used by jaxtyping
+]
