@@ -95,9 +95,7 @@ def imshow(tensor: t.Tensor, renderer=None, **kwargs):
     if facet_labels:
         # Weird thing where facet col wrap means labels are in wrong order
         if "facet_col_wrap" in kwargs_pre:
-            facet_labels = reorder_list_in_plotly_way(
-                facet_labels, kwargs_pre["facet_col_wrap"]
-            )
+            facet_labels = reorder_list_in_plotly_way(facet_labels, kwargs_pre["facet_col_wrap"])
         for i, label in enumerate(facet_labels):
             fig.layout.annotations[i]["text"] = label  # type: ignore
     if border:
@@ -115,20 +113,14 @@ def imshow(tensor: t.Tensor, renderer=None, **kwargs):
             if isinstance(text[0][0], str):
                 text = [text for _ in range(len(fig.data))]
         for i, _text in enumerate(text):
-            fig.data[i].update(
-                text=_text, texttemplate="%{text}", textfont={"size": 12}
-            )
+            fig.data[i].update(text=_text, texttemplate="%{text}", textfont={"size": 12})
     # Very hacky way of fixing the fact that updating layout with xaxis_* only applies to first facet by default
     if xaxis_tickangle is not None:
         n_facets = 1 if tensor.ndim == 2 else tensor.shape[0]
         for i in range(1, 1 + n_facets):
             xaxis_name = "xaxis" if i == 1 else f"xaxis{i}"
             fig.layout[xaxis_name]["tickangle"] = xaxis_tickangle  # type: ignore
-    return (
-        fig
-        if return_fig
-        else fig.show(renderer=renderer, config={"staticPlot": static})
-    )
+    return fig if return_fig else fig.show(renderer=renderer, config={"staticPlot": static})
 
 
 def reorder_list_in_plotly_way(L: list, col_wrap: int):
@@ -173,9 +165,7 @@ def line(y: t.Tensor | list, renderer=None, **kwargs):
         for k in ["title", "template", "width", "height"]:
             if k in kwargs_pre:
                 kwargs_post[k] = kwargs_pre.pop(k)
-        fig = make_subplots(specs=[[{"secondary_y": True}]]).update_layout(
-            **kwargs_post
-        )
+        fig = make_subplots(specs=[[{"secondary_y": True}]]).update_layout(**kwargs_post)
         y0 = to_numpy(y[0])
         y1 = to_numpy(y[1])
         x0, x1 = kwargs_pre.pop("x", [np.arange(len(y0)), np.arange(len(y1))])
@@ -185,8 +175,7 @@ def line(y: t.Tensor | list, renderer=None, **kwargs):
     else:
         y = (
             list(map(to_numpy, y))
-            if isinstance(y, list)
-            and not (isinstance(y[0], int) or isinstance(y[0], float))
+            if isinstance(y, list) and not (isinstance(y[0], int) or isinstance(y[0], float))
             else to_numpy(y)
         )  # type: ignore
         names = kwargs_pre.pop("names", None)
@@ -205,9 +194,7 @@ def scatter(x, y, renderer=None, **kwargs):
     kwargs_post = {k: v for k, v in kwargs.items() if k in update_layout_set}
     kwargs_traces = {k: v for k, v in kwargs.items() if k in update_traces_set}
     kwargs_pre = {
-        k: v
-        for k, v in kwargs.items()
-        if k not in (update_layout_set | update_traces_set)
+        k: v for k, v in kwargs.items() if k not in (update_layout_set | update_traces_set)
     }
     if ("size" in kwargs_pre) or ("shape" in kwargs_pre):
         size = kwargs_pre.pop("size", None) or kwargs_pre.pop("shape", None)
@@ -222,9 +209,7 @@ def scatter(x, y, renderer=None, **kwargs):
         yrange = fig.layout.yaxis.range or [y.min(), y.max()]  # type: ignore
         add_line = add_line.replace(" ", "")
         if add_line in ["x=y", "y=x"]:
-            fig.add_trace(
-                go.Scatter(mode="lines", x=xrange, y=xrange, showlegend=False)
-            )
+            fig.add_trace(go.Scatter(mode="lines", x=xrange, y=xrange, showlegend=False))
         elif re.match("(x|y)=", add_line):
             try:
                 c = float(add_line.split("=")[1])
@@ -311,9 +296,7 @@ def hist(tensor, renderer=None, **kwargs):
     # If `arr` has a list of arrays, then just doing px.histogram doesn't work annoyingly enough
     # This is janky, even for my functions!
     if isinstance(arr, list) and isinstance(arr[0], np.ndarray):
-        assert (
-            "marginal" not in kwargs_pre
-        ), "Can't use `marginal` with a list of arrays"
+        assert "marginal" not in kwargs_pre, "Can't use `marginal` with a list of arrays"
         for thing_to_move_from_pre_to_post in [
             "title",
             "template",
@@ -334,9 +317,7 @@ def hist(tensor, renderer=None, **kwargs):
             kwargs_pre["nbinsx"] = int(kwargs_pre.pop("nbins"))
         for x in arr:
             fig.add_trace(
-                go.Histogram(
-                    x=x, name=names.pop(0) if names is not None else None, **kwargs_pre
-                )
+                go.Histogram(x=x, name=names.pop(0) if names is not None else None, **kwargs_pre)
             )
     else:
         fig = px.histogram(x=arr, **kwargs_pre).update_layout(**kwargs_post)
@@ -372,9 +353,7 @@ def hist(tensor, renderer=None, **kwargs):
 # PLOTTING FUNCTIONS FOR PART 2: INTRO TO MECH INTERP
 
 
-def plot_comp_scores(
-    model, comp_scores, title: str = "", baseline: t.Tensor | None = None
-):
+def plot_comp_scores(model, comp_scores, title: str = "", baseline: t.Tensor | None = None):
     px.imshow(
         to_numpy(comp_scores),
         y=[f"L0H{h}" for h in range(model.cfg.n_heads)],
@@ -396,9 +375,7 @@ def convert_tokens_to_string(model, tokens, batch_index=0):
     return [f"|{model.tokenizer.decode(tok)}|_{c}" for (c, tok) in enumerate(tokens)]
 
 
-def plot_logit_attribution(
-    model, logit_attr: t.Tensor, tokens: t.Tensor, title: str = ""
-):
+def plot_logit_attribution(model, logit_attr: t.Tensor, tokens: t.Tensor, title: str = ""):
     tokens = tokens.squeeze()
     y_labels = convert_tokens_to_string(model, tokens[:-1])
     x_labels = ["Direct"] + [
@@ -480,13 +457,21 @@ def plot_contribution_vs_open_proportion(
             color=failure_types,
             color_discrete_map=color_discrete_map,
             title=title,
-            template="simple_white",
+            # template="simple_white",
             height=500,
-            width=800,
-            labels={"x": "Open-proportion", "y": f"Head {title} contribution"},
+            width=1000,
+            labels={"x": "Open-proportion", "y": title.split(" ")[0]},
         )
-        .update_traces(marker_size=4, opacity=0.5)
+        .update_traces(marker_size=4, opacity=0.3)
         .update_layout(legend_title_text="Failure type")
+        # Add a horizontal line at y=0
+        .add_hline(
+            y=0,
+            line_dash="dash",
+            line_color="black",
+            annotation_text="y=0",
+            annotation_position="bottom right",
+        )
     )
     fig.show()
 
@@ -529,13 +514,9 @@ def plot_neurons(
     layer: int,
     renderer=None,
 ):
-    failure_types = np.full(
-        neurons_in_unbalanced_dir.shape[0], "", dtype=np.dtype("U32")
-    )
+    failure_types = np.full(neurons_in_unbalanced_dir.shape[0], "", dtype=np.dtype("U32"))
     for name, mask in failure_types_dict.items():
-        failure_types = np.where(
-            to_numpy(mask[to_numpy(data.starts_open)]), name, failure_types
-        )
+        failure_types = np.where(to_numpy(mask[to_numpy(data.starts_open)]), name, failure_types)
 
     # Get data that can be turned into a dataframe (plotly express is sometimes easier to use with a dataframe)
     # Plot a scatter plot of all the neuron contributions, color-coded according to failure type, with slider to view neurons
@@ -622,9 +603,7 @@ def hists_per_comp(
     }
     n_layers = out_by_component_in_unbalanced_dir.shape[0] // 3
     fig = make_subplots(rows=n_layers + 1, cols=3)
-    for ((row, col), title), in_dir in zip(
-        titles.items(), out_by_component_in_unbalanced_dir
-    ):
+    for ((row, col), title), in_dir in zip(titles.items(), out_by_component_in_unbalanced_dir):
         fig.add_trace(
             go.Histogram(
                 x=to_numpy(in_dir[data.isbal]),
