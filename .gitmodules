@@ -16,3 +16,6 @@
 [submodule "gpt_from_scratch/ARENA_3.0"]
 	path = gpt_from_scratch/ARENA_3.0
 	url = https://github.com/callummcdougall/ARENA_3.0.git
+[submodule "gpt_from_scratch/e2e_sae"]
+	path = gpt_from_scratch/e2e_sae
+	url = https://github.com/ApolloResearch/e2e_sae.git
