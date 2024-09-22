@@ -318,7 +318,6 @@ class TranscoderTrainer:
         self.optimizer = torch.optim.AdamW(
             self.transcoder.parameters(),
             lr=transcoder_training_cfg.learning_rate,
-            weight_decay=0.1,
         )
 
         # arbitrary name used to distinguish it in logging

@@ -149,7 +149,6 @@ class SAETrainer:
         self.optimizer = torch.optim.AdamW(
             self.sae.parameters(),
             lr=sae_trainer_cfg.lr,
-            weight_decay=0.1,
         )
 
         # arbitrary name used to distinguish it in logging
