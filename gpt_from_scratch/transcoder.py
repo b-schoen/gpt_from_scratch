@@ -5,6 +5,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor, nn
+import torch.optim as optim
+
+import transformer_lens as tl
 import math
 
 import einops
@@ -44,13 +47,14 @@ class TranscoderConfig:
         cls,
         model: transformer_lens.HookedTransformer,
         device: torch.device,
+        expansion_factor: int = TRANSCODER_EXPANSION_FACTOR,
     ) -> "TranscoderConfig":
 
         return cls(
             d_in=model.cfg.d_model,
             d_out=model.cfg.d_model,
             # our transcoder has a hidden dimension of d_mlp * expansion factor
-            d_hidden=model.cfg.d_mlp * TRANSCODER_EXPANSION_FACTOR,
+            d_hidden=model.cfg.d_mlp * expansion_factor,
             dtype=model.cfg.dtype,
             device=device,
         )
@@ -98,6 +102,13 @@ class TranscoderResults:
 
     transcoder_out: Float[Tensor, "... d_out"]
     hidden_activations: Float[Tensor, "... d_hidden"]
+
+
+@dataclasses.dataclass
+class TranscoderLoss:
+    total_loss: Float[torch.Tensor, ""]
+    mse_loss: Float[torch.Tensor, ""]
+    l1_loss: Float[torch.Tensor, ""]
 
 
 class Transcoder(nn.Module):
@@ -264,12 +275,6 @@ class Transcoder(nn.Module):
         self.W_dec.data /= torch.norm(self.W_dec.data, dim=1, keepdim=True)
 
 
-@dataclasses.dataclass
-class TranscoderLoss:
-    mse_loss: Float[torch.Tensor, ""]
-    l1_loss: Float[torch.Tensor, ""]
-
-
 def compute_loss(
     cfg: TranscoderTrainingConfig,
     mlp_out: Float[torch.Tensor, "batch seq d_model"],
@@ -277,20 +282,114 @@ def compute_loss(
 ) -> TranscoderLoss:
     # Compute MSE loss for each example in the batch
     # We first compute the element-wise squared difference, then average over all dimensions
-    mse_loss: Float[torch.Tensor, ""] = torch.mean(
-        (results.transcoder_out - mlp_out) ** 2
-    )
 
-    # Double-check: This calculation is correct
-    # Explanation:
-    # 1. (results.transcoder_out - mlp_out) computes the difference between predicted and actual values
-    # 2. ** 2 squares these differences
-    # 3. torch.mean() averages over all dimensions (batch, seq, and d_model)
-    # This is the standard formula for Mean Squared Error (MSE) loss
+    # per https://github.com/neelnanda-io/1L-Sparse-Autoencoder/blob/main/utils.py#L129C54-L129C77
+    # and https://github.com/jacobdunefsky/transcoder_circuits/blob/master/sae_training/sparse_autoencoder.py#L147
+    mse_loss: Float[torch.Tensor, ""] = F.mse_loss(mlp_out, results.transcoder_out)
 
     # Compute L1 loss (sparsity regularization) on hidden activations
-    l1_loss: Float[torch.Tensor, ""] = (
-        cfg.l1_coefficient * torch.abs(results.hidden_activations).mean()
-    )
 
-    return TranscoderLoss(mse_loss=mse_loss, l1_loss=l1_loss)
+    # note: doing sum per `https://github.com/neelnanda-io/1L-Sparse-Autoencoder/blob/main/utils.py#L130`
+    l1_loss: Float[torch.Tensor, ""] = cfg.l1_coefficient * results.hidden_activations.abs().sum()
+
+    total_loss = mse_loss + l1_loss
+
+    return TranscoderLoss(total_loss=total_loss, mse_loss=mse_loss, l1_loss=l1_loss)
+
+
+@dataclasses.dataclass
+class TranscoderTrainerOutput:
+    loss: TranscoderLoss
+    results: TranscoderResults
+
+
+class TranscoderTrainer:
+
+    def __init__(
+        self,
+        transcoder_cfg: TranscoderConfig,
+        transcoder_training_cfg: TranscoderTrainingConfig,
+        device: torch.device,
+    ) -> None:
+        self.cfg = transcoder_training_cfg
+        self.transcoder = Transcoder(transcoder_cfg).to(device)
+
+        # create optimizer
+        self.optimizer = torch.optim.AdamW(
+            self.transcoder.parameters(),
+            lr=transcoder_training_cfg.learning_rate,
+            weight_decay=0.1,
+        )
+
+        # arbitrary name used to distinguish it in logging
+        self._name = f"tc_L{self.cfg.hook_point_layer}"
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    def train_on_cache(self, cache: tl.ActivationCache) -> TranscoderTrainerOutput:
+
+        mlp_in = cache[self.cfg.hook_point]
+        mlp_out = cache[self.cfg.out_hook_point]
+
+        self.transcoder.train()
+
+        self.optimizer.zero_grad()
+
+        transcoder_results = self.transcoder(mlp_in)
+
+        loss = compute_loss(cfg=self.cfg, mlp_out=mlp_out, results=transcoder_results)
+
+        loss.total_loss.backward()
+
+        self.optimizer.step()
+
+        return TranscoderTrainerOutput(loss=loss, results=transcoder_results)
+
+    def get_wandb_log_dict(
+        self,
+        trainer_output: TranscoderTrainerOutput,
+    ) -> dict[str, float]:
+        """
+        Creates a dictionary containing relevant statistics for logging to wandb.
+        """
+        # Extract total loss and individual components
+        total_loss = trainer_output.loss.total_loss.item()
+        mse_loss = trainer_output.loss.mse_loss.item()
+        l1_loss = trainer_output.loss.l1_loss.item()
+
+        # Get learning rate from optimizer
+        learning_rate = self.optimizer.param_groups[0]["lr"]
+
+        # Calculate norms of encoder and decoder weights
+        W_enc_norm = self.transcoder.W_enc.norm().item()
+        W_dec_norm = self.transcoder.W_dec.norm().item()
+
+        # Compute statistics about the hidden activations
+        hidden_activations = trainer_output.results.hidden_activations
+
+        # Calculate sparsity: fraction of activations near zero
+        sparsity = (hidden_activations.abs() < 1e-6).float().mean().item()
+
+        # Calculate mean and std of activations
+        mean_activation = hidden_activations.mean().item()
+        std_activation = hidden_activations.std().item()
+
+        # Create log dictionary
+        log_dict = {
+            f"{self._name}/{k}": v
+            for k, v in {
+                "total_loss": total_loss,
+                "mse_loss": mse_loss,
+                "l1_loss": l1_loss,
+                "learning_rate": learning_rate,
+                "W_enc_norm": W_enc_norm,
+                "W_dec_norm": W_dec_norm,
+                "hidden_activations_sparsity": sparsity,
+                "hidden_activations_mean": mean_activation,
+                "hidden_activations_std": std_activation,
+            }.items()
+        }
+
+        return log_dict
