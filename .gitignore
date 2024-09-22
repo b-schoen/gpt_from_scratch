@@ -15,6 +15,13 @@ sad/
 **/sad
 **/sad/**/*
 
+# wandb
+wandb/
+wandb_artifacts/
+
+# models
+checkpoints/
+
 # osx
 .DS_Store/
 .DS_Store
