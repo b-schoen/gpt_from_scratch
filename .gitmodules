@@ -19,3 +19,6 @@
 [submodule "gpt_from_scratch/e2e_sae"]
 	path = gpt_from_scratch/e2e_sae
 	url = https://github.com/ApolloResearch/e2e_sae.git
+[submodule "gpt_from_scratch/feature-circuits"]
+	path = gpt_from_scratch/feature-circuits
+	url = https://github.com/saprmarks/feature-circuits.git
