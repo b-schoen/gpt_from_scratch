@@ -22,3 +22,6 @@
 [submodule "gpt_from_scratch/feature-circuits"]
 	path = gpt_from_scratch/feature-circuits
 	url = https://github.com/saprmarks/feature-circuits.git
+[submodule "gpt_from_scratch/automated-interpretability"]
+	path = gpt_from_scratch/automated-interpretability
+	url = https://github.com/openai/automated-interpretability.git

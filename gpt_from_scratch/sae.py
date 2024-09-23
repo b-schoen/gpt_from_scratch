@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
+import torch.optim.lr_scheduler as lr_scheduler
 
 import transformer_lens as tl
 
@@ -73,40 +74,52 @@ class SAE(nn.Module):
         self.n_dict_components = cfg.n_dict_components
         self.input_size = cfg.input_size
 
-        # self.encoder[0].weight has shape: (n_dict_components, input_size)
-        # self.decoder.weight has shape:    (input_size, n_dict_components)
-        self.encoder = nn.Sequential(
-            nn.Linear(cfg.input_size, cfg.n_dict_components, bias=True),
-            nn.ReLU(),
+        self.W_enc = nn.Parameter(
+            torch.nn.init.kaiming_uniform_(
+                torch.empty(cfg.input_size, cfg.n_dict_components, dtype=torch.float)
+            )
         )
-        self.decoder = nn.Linear(cfg.n_dict_components, cfg.input_size, bias=True)
+        self.W_dec = nn.Parameter(
+            torch.nn.init.kaiming_uniform_(
+                torch.empty(cfg.n_dict_components, cfg.input_size, dtype=torch.float)
+            )
+        )
+        self.b_enc = nn.Parameter(torch.zeros(cfg.n_dict_components, dtype=torch.float))
+        self.b_dec = nn.Parameter(torch.zeros(cfg.input_size, dtype=torch.float))
 
-        if cfg.init_decoder_orthogonal:
-            # Initialize so that there are n_dict_components orthonormal vectors
-            self.decoder.weight.data = nn.init.orthogonal_(self.decoder.weight.data.T).T
+        self.W_dec.data[:] = self.W_dec / self.W_dec.norm(dim=-1, keepdim=True)
 
     def forward(self, x: Float[torch.Tensor, "batch input_size"]) -> SAEOutput:
         """Pass input through the encoder and normalized decoder."""
-        x_sae_activations: Float[torch.Tensor, "batch n_dict_components"] = self.encoder(x)
 
-        x_reconstructed: Float[torch.Tensor, "batch input_size"] = F.linear(
-            x_sae_activations,
-            self.dict_elements,
-            bias=self.decoder.bias,
+        # center x {per anthropic} same as transcoder
+        x_cent = x - self.b_dec
+
+        x_sae_activations: Float[torch.Tensor, "batch n_dict_components"] = F.relu(
+            x_cent @ self.W_enc + self.b_enc
+        )
+
+        x_reconstructed: Float[torch.Tensor, "batch input_size"] = (
+            x_sae_activations @ self.W_dec + self.b_dec
         )
 
         return SAEOutput(x_reconstructed=x_reconstructed, x_sae_activations=x_sae_activations)
 
-    @property
-    def dict_elements(self) -> Float[torch.Tensor, "input_size n_dict_components"]:
-        """Dictionary elements are simply the normalized decoder weights."""
-        return F.normalize(self.decoder.weight, dim=0)
+    @torch.no_grad()
+    def make_decoder_weights_and_grad_unit_norm(self) -> None:
+        W_dec_normed = self.W_dec / self.W_dec.norm(dim=-1, keepdim=True)
+        W_dec_grad_proj = (self.W_dec.grad * W_dec_normed).sum(-1, keepdim=True) * W_dec_normed
+        self.W_dec.grad -= W_dec_grad_proj
+        # Bugfix(?) for ensuring W_dec retains unit norm, this was not there when I trained my original autoencoders.
+        self.W_dec.data = W_dec_normed
 
     @property
     def device(self) -> torch.device:
         return next(self.parameters()).device
 
 
+# TODO(bschoen): https://github.com/ApolloResearch/e2e_sae/blob/main/e2e_sae/losses.py is a REALLY
+#                good reference here
 def compute_loss(
     x: Float[torch.Tensor, "batch input_size"],
     x_sae_output: SAEOutput,
@@ -151,6 +164,9 @@ class SAETrainer:
             lr=sae_trainer_cfg.lr,
         )
 
+        # create learning rate scheduler
+        # self.scheduler = lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=self.cfg.num_epochs)
+
         # arbitrary name used to distinguish it in logging
 
         short_layer_name = sae_trainer_cfg.hook_point.split(".")[1]
@@ -175,7 +191,11 @@ class SAETrainer:
 
         loss.total_loss.backward()
 
+        self.sae.make_decoder_weights_and_grad_unit_norm()
+
         self.optimizer.step()
+
+        # self.scheduler.step()
 
         return SAETrainerOutput(loss=loss, results=sae_output)
 
@@ -192,8 +212,8 @@ class SAETrainer:
         learning_rate = self.optimizer.param_groups[0]["lr"]
 
         # Calculate norms of encoder and decoder weights
-        encoder_weight_norm = self.sae.encoder[0].weight.norm().item()
-        decoder_weight_norm = self.sae.decoder.weight.norm().item()
+        encoder_weight_norm = self.sae.W_enc.norm().item()
+        decoder_weight_norm = self.sae.W_dec.norm().item()
 
         # Optionally calculate sparsity and mean of activations
         x_sae_activations = trainer_output.results.x_sae_activations
