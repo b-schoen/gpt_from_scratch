@@ -17,6 +17,7 @@ Table of Contents
 - [GemmaScope / SAELens usage](#gemmascope--saelens-usage)
 - [Toy Problem With Hooked Transformer](#toy-problem-with-hooked-transformer)
   - [Probing](#probing)
+  - [Model Generated Interpretations of SAE Latents](#model-generated-interpretations-of-sae-latents)
 - [Scaling Laws](#scaling-laws)
   - [MSE Loss (Regression)](#mse-loss-regression)
   - [CrossEntropy Loss (Classification)](#crossentropy-loss-classification)
@@ -255,6 +256,12 @@ Breaking it down by attention head and MLP:
 Looking at a single example, we can even see attention head formation:
 
 <img src="./images/example_toy_models_sorted_attention_head_evolution.gif" width="1000">
+
+### Model Generated Interpretations of SAE Latents
+
+We can also look at model generated interpretations of SAE latents:
+
+<img src="./images/example_toy_model_model_generated_explanations_of_sae_features.png" width="1000">
 
 
 ---
