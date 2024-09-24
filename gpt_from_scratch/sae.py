@@ -165,7 +165,7 @@ class SAETrainer:
         )
 
         # create learning rate scheduler
-        # self.scheduler = lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=self.cfg.num_epochs)
+        self.scheduler = lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=self.cfg.num_epochs)
 
         # arbitrary name used to distinguish it in logging
 
@@ -195,7 +195,7 @@ class SAETrainer:
 
         self.optimizer.step()
 
-        # self.scheduler.step()
+        self.scheduler.step()
 
         return SAETrainerOutput(loss=loss, results=sae_output)
 
